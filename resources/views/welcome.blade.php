@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Temu Kembali Informasi - Arsip Surat</title>
+    <title>Sistem Temu Kembali Informasi - Arsip Surat Kecamatan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -14,7 +14,7 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <i class="fas fa-archive text-blue-600 text-2xl mr-3"></i>
-                    <h1 class="text-xl font-bold text-gray-800">Sistem Arsip Digital</h1>
+                    <h1 class="text-xl font-bold text-gray-800">Sistem Arsip SuratDigital</h1>
                 </div>
                 <div class="flex items-center space-x-4">
                     <button class="text-gray-600 hover:text-blue-600">
