@@ -2,120 +2,76 @@
 
 namespace App\Helpers;
 
-class Preprocessing
+use Sastrawi\StopWordRemover\StopWordRemoverFactory;
+use Sastrawi\Stemmer\StemmerFactory;
+
+class PreprocessingText
 {
-     private static $stopWordRemover;
-    private static $stemmer;
+    private static ?object $stopWordRemover = null;
+    private static ?object $stemmer = null;
 
-    /**
-     * Inisialisasi Sastrawi (Stopword Remover & Stemmer)
-     */
-    private static function ensureInitialized()
+    private static function init(): void
     {
-        if (!self::$stopWordRemover || !self::$stemmer) {
-            $stopWordRemoverFactory = new StopWordRemoverFactory();
-            self::$stopWordRemover = $stopWordRemoverFactory->createStopWordRemover();
-
-            $stemmerFactory = new StemmerFactory();
-            self::$stemmer = $stemmerFactory->createStemmer();
+        if (self::$stopWordRemover === null) {
+            self::$stopWordRemover = (new StopWordRemoverFactory)->createStopWordRemover();
+            self::$stemmer         = (new StemmerFactory)->createStemmer();
         }
     }
 
-    /**
-     * Melakukan normalisasi simbol dan tokenisasi teks menjadi array kata.
-     */
-    public static function tokenize($text)
+    /* ---------- API Utama ---------- */
+    public static function preprocessText(string $text): array
     {
-        // Hilangkan angka daftar seperti: 1. 2) 3. dll
-        $text = preg_replace('/\b[0-9]+[\.\)]/', '', $text);
-
-        // Hilangkan simbol lain yang tidak relevan (misal tanda titik koma ganda, tanda petik ganda, dll)
-        $text = preg_replace('/[^\p{L}\s]+/u', ' ', $text);
-
-        // Tokenisasi dengan split berdasarkan spasi (karena simbol sudah dibersihkan)
-        return preg_split('/\s+/', $text, -1, PREG_SPLIT_NO_EMPTY); 
-    }
-
-
-    /**
-     * Menyaring token hanya yang terdiri dari huruf dan panjang > 2 karakter.
-     */
-    public static function filterTokens($tokens)
-    {
-        // Filtering token (hanya huruf dan tidak kosong)
-        return array_filter($tokens, function ($token) {
-            return preg_match('/^[a-z]+$/', $token) && mb_strlen($token) > 2;
-        });
-    }
-
-    /**
-     * Menghapus stopwords standar Sastrawi dan daftar kata tidak bermakna khusus.
-     */
-    public static function removeStopwords($tokens)
-    {
-        // Remove Stopwords menggunakan Sastrawi saja
-        return array_filter(array_map(function ($token) {
-            return self::$stopWordRemover->remove($token);
-        }, $tokens), function ($token) {
-            return $token !== '';
-        });
-    }
-
-
-    /**
-     * Melakukan stemming terhadap token.
-     */
-    public static function stemTokens($tokens)
-    {
-        return array_filter(array_map(function($token) {
-            return self::$stemmer->stem($token);
-        }, $tokens), function($token) {
-            return $token !== '';
-        });
-    }
-
-    /**
-     * Menjalankan semua proses preprocessing dalam satu fungsi:
-     * → tokenisasi → filter → stopword removal → stemming.
-     */
-    public static function preprocessText($text)
-    {
-        // Inisialisasi Sastrawi jika belum
-        self::ensureInitialized();
-        // 2. Tokenize
+        self::init();
         $tokens = self::tokenize($text);
-        // 3. Filter tokens
-        $filteredTokens = self::filterTokens($tokens);
-        // 4. Remove stopwords
-        $noStopwords = self::removeStopwords($filteredTokens);
-        // 5. Stemming
-        $stemmedTokens = self::stemTokens($noStopwords);
-        // 6. Kembalikan hasil akhir
-        return $stemmedTokens;
+        $tokens = self::filterTokens($tokens);
+        $tokens = self::removeStopwords($tokens);
+        $tokens = self::stemTokens($tokens);
+        return array_values($tokens);   // pasti array numerik
     }
 
-    public static function preprocessTextDetailed($text)
+    /* ---------- Langkah-langkah ---------- */
+    private static function tokenize(string $text): array
     {
-        self::ensureInitialized();
+        $text = preg_replace('/\b\d+[\.\)]/', '', $text);           // hapus 1. 2)
+        $text = preg_replace('/[^\p{L}\s]+/u', ' ', $text);        // hapus simbol
+        return preg_split('/\s+/', mb_strtolower($text), -1, PREG_SPLIT_NO_EMPTY);
+    }
 
-        // 2. Tokenize
-        $tokens = self::tokenize($text);
+    private static function filterTokens(array $tokens): array
+    {
+        return array_filter($tokens, fn($t) => preg_match('/^[a-z]{3,}$/', $t));
+    }
 
-        // 3. Filter
+    private static function removeStopwords(array $tokens): array
+    {
+        return array_filter(
+            array_map(fn($t) => self::$stopWordRemover->remove($t), $tokens),
+            fn($t) => $t !== ''
+        );
+    }
+
+    private static function stemTokens(array $tokens): array
+    {
+        return array_filter(
+            array_map(fn($t) => self::$stemmer->stem($t), $tokens),
+            fn($t) => $t !== ''
+        );
+    }
+
+    /* ---------- API Debug ---------- */
+    public static function preprocessTextDetailed(string $text): array
+    {
+        self::init();
+        $tokens   = self::tokenize($text);
         $filtered = self::filterTokens($tokens);
-
-        // 4. Remove stopwords
-        $noStopwords = self::removeStopwords($filtered);
-
-        // 5. Stemming
-        $stemmed = self::stemTokens($noStopwords);
+        $noStop   = self::removeStopwords($filtered);
+        $stemmed  = self::stemTokens($noStop);
 
         return [
-            'tokenizing' => $tokens,
-            'filtering' => array_values($filtered),
-            'stopword_removal' => array_values($noStopwords),
-            'stemming' => array_values($stemmed),
+            'tokenizing'       => array_values($tokens),
+            'filtering'        => array_values($filtered),
+            'stopword_removal' => array_values($noStop),
+            'stemming'         => array_values($stemmed),
         ];
     }
-
 }

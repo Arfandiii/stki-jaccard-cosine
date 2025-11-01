@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c514d8f7b9fc5970bdd94287905ef584",
+    "content-hash": "4002dca0440524a478c3027fe502a543",
     "packages": [
         {
             "name": "brick/math",
@@ -3276,6 +3276,66 @@
                 "source": "https://github.com/ramsey/uuid/tree/4.9.1"
             },
             "time": "2025-09-04T20:59:21+00:00"
+        },
+        {
+            "name": "sastrawi/sastrawi",
+            "version": "v1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sastrawi/sastrawi.git",
+                "reference": "31fd4261dd4980cc57447f44d1aec4bd69e2abec"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sastrawi/sastrawi/zipball/31fd4261dd4980cc57447f44d1aec4bd69e2abec",
+                "reference": "31fd4261dd4980cc57447f44d1aec4bd69e2abec",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.8.7",
+                "squizlabs/php_codesniffer": "~1.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Sastrawi\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andy Librian",
+                    "email": "andylibrian@gmail.com",
+                    "homepage": "http://andylibrian.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "PHP library for stemming Indonesian language (Bahasa Indonesia)",
+            "homepage": "https://github.com/sastrawi/sastrawi",
+            "keywords": [
+                "bahasa",
+                "indonesia",
+                "indonesian",
+                "kata dasar",
+                "root word",
+                "stem"
+            ],
+            "support": {
+                "issues": "https://github.com/sastrawi/sastrawi/issues",
+                "source": "https://github.com/sastrawi/sastrawi"
+            },
+            "time": "2016-10-22T03:19:27+00:00"
         },
         {
             "name": "symfony/clock",
@@ -8391,12 +8451,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.2"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
 }
