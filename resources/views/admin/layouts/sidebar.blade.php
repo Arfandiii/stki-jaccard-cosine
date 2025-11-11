@@ -1,17 +1,18 @@
 <!-- Sidebar -->
-<aside
-    class="w-60 -translate-x-48 fixed transition transform ease-in-out duration-1000 z-50 flex h-screen bg-linear-to-r from-purple-600 to-blue-500">
+<aside class="w-60 -translate-x-48 fixed transition transform ease-in-out duration-1000 z-50 flex h-screen bg-blue-500">
     <!-- open sidebar button -->
     <div
-        class="max-toolbar translate-x-24 scale-x-0 w-full -right-6 transition transform ease-in duration-300 flex items-center justify-between border-4 border-white bg-linear-to-r from-blue-500 to-purple-600 absolute top-2 rounded-full h-12">
+        class="max-toolbar translate-x-24 scale-x-0 w-full -right-6 transition transform ease-in duration-300 flex items-center justify-between border-4 border-white bg-blue-500 absolute top-2 rounded-full h-12">
         <div class="pl-4 items-center space-x-2 ">
-            <div class="hover:cursor-pointer text-white hover:text-zinc-900">
+            <div class="hover:cursor-pointer text-white hover:text-blue-200">
                 <a href="#">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                        <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd"
+                            d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                            clip-rule="evenodd" />
                     </svg>
                 </a>
-            </div> 
+            </div>
         </div>
         <div class="flex items-center space-x-3 group bg-blue-600 pl-10 pr-2 py-1 rounded-full text-white font-medium">
             <div class="transform ease-in-out duration-300 mr-12">
@@ -33,7 +34,7 @@
         <a href="#">
             <x-nav-link-admin iconType="dashboard">Dashboard</x-nav-link-admin>
         </a>
-        <form action="#" method="post" class="border-t-2 border-blue-700 pt-2">
+        <form action="#" method="post" class="border-t-2 border-blue-200 pt-2">
             @csrf
             <button type="submit" class="w-full text-left">
                 <x-nav-link-admin iconType="logout">Logout</x-nav-link-admin>
@@ -46,7 +47,7 @@
         <a href="#">
             <x-nav-link-mini-admin iconType="dashboard"></x-nav-link-mini-admin>
         </a>
-        <form action="#" method="post" class="border-t-2 border-blue-700 pt-2">
+        <form action="#" method="post" class="border-t-2 border-blue-200 pt-2">
             @csrf
             <button type="submit" class="w-full text-left">
                 <x-nav-link-mini-admin iconType="logout"></x-nav-link-mini-admin>

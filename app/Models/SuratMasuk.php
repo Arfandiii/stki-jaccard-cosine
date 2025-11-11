@@ -11,7 +11,10 @@ class SuratMasuk extends Model
 {
     protected $table = 'surat_masuk';
     protected $fillable = ['nomor_surat','tanggal_surat','tanggal_terima','asal_surat','perihal','jenis_surat','file_path'];
-
+    protected $casts = [
+    'tanggal_surat'  => 'date:Y-m-d',
+    'tanggal_terima' => 'date:Y-m-d',
+    ];
     /* otomatis preprocessing & indeks saat create / update */
     protected static function booted(): void
     {

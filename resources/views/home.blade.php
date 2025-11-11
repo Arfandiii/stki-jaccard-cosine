@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,58 +10,89 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
         }
-        
+
         @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
-        
+
         @keyframes slide-up {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
-        
-        .float-animation { animation: float 6s ease-in-out infinite; }
-        .pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
-        .slide-up { animation: slide-up 0.8s ease-out; }
-        
+
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+        }
+
+        .slide-up {
+            animation: slide-up 0.8s ease-out;
+        }
+
         .gradient-text {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .glass-effect {
             backdrop-filter: blur(10px);
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         .hover-card {
             transition: all 0.3s ease;
         }
-        
+
         .hover-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
-        
+
         .algorithm-card {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
-        
+
         .search-glow:focus {
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
     </style>
 </head>
+
 <body class="bg-gray-50 overflow-x-hidden">
-    
+
     <!-- Navigation -->
     <nav class="fixed w-full top-0 bg-white/90 backdrop-blur-md shadow-sm z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -68,24 +100,29 @@
                 <div class="flex items-center">
                     <div class="shrink-0">
                         <div class="flex items-center">
-                            <div class="w-8 h-8 bg-linear-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <div
+                                class="w-8 h-8 bg-linear-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                                 <i class="fas fa-archive text-white text-sm"></i>
                             </div>
                             <span class="ml-2 text-xl font-bold gradient-text">Arsip Surat</span>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#home" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition">Beranda</a>
-                        <a href="#features" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition">Fitur</a>
-                        <a href="#about" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition">Tentang</a>
+                        <a href="#home"
+                            class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition">Beranda</a>
+                        <a href="#features"
+                            class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition">Fitur</a>
+                        <a href="#about"
+                            class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition">Tentang</a>
                     </div>
                 </div>
 
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('login')}}" class="bg-linear-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition">
+                    <a href="{{ route('login') }}"
+                        class="bg-linear-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition">
                         <i class="#"></i>Login
                     </a>
                     <button class="md:hidden text-gray-700" onclick="toggleMobileMenu()">
@@ -109,30 +146,36 @@
     <section id="home" class="pt-20 pb-32 min-h-screen flex items-center relative overflow-hidden">
         <!-- Background decoration -->
         <div class="absolute inset-0 z-0">
-            <div class="absolute top-20 left-10 w-72 h-72 bg-blue-200 rounded-full filter blur-3xl opacity-30 float-animation"></div>
-            <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-200 rounded-full filter blur-3xl opacity-30 float-animation" style="animation-delay: 3s;"></div>
+            <div
+                class="absolute top-20 left-10 w-72 h-72 bg-blue-200 rounded-full filter blur-3xl opacity-30 float-animation">
+            </div>
+            <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-200 rounded-full filter blur-3xl opacity-30 float-animation"
+                style="animation-delay: 3s;"></div>
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="slide-up">
-                    
+
                     <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
                         Sistem Temu Kembali Informasi
                         <span class="gradient-text">Pencarian Arsip Surat</span>
                     </h1>
-                    
+
                     <p class="text-lg text-gray-600 mb-8 leading-relaxed">
-                        Temukan arsip surat dengan mudah menggunakan algoritma Jaccard Similarity dan Cosine Similarity. 
-                        Sistem kami memberikan hasil pencarian yang akurat dan relevan untuk arsip surat masuk dan keluar.
+                        Temukan arsip surat dengan mudah menggunakan algoritma Jaccard Similarity dan Cosine Similarity.
+                        Sistem kami memberikan hasil pencarian yang akurat dan relevan untuk arsip surat masuk dan
+                        keluar.
                     </p>
-                    
+
                     <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="{{ route('login')}}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition transform hover:-translate-y-1">
+                        <a href="{{ route('login') }}"
+                            class="inline-flex items-center px-6 py-3 bg-linear-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition transform hover:-translate-y-1">
                             <i class="fas fa-search mr-2"></i>
                             Mulai Pencarian
                         </a>
-                        <a href="#features" class="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition">
+                        <a href="#features"
+                            class="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition">
                             <i class="fas fa-info-circle mr-2"></i>
                             Pelajari Fitur
                         </a>
@@ -141,7 +184,9 @@
 
                 <div class="slide-up" style="animation-delay: 0.2s;">
                     <div class="relative">
-                        <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-3xl transform rotate-6 opacity-20"></div>
+                        <div
+                            class="absolute inset-0 bg-linear-to-r from-blue-400 to-purple-500 rounded-3xl transform rotate-6 opacity-20">
+                        </div>
                         <div class="relative bg-white rounded-3xl shadow-2xl p-8">
                             <div class="flex items-center justify-between mb-6">
                                 <h3 class="text-xl font-bold text-gray-800">Demo Pencarian</h3>
@@ -151,29 +196,32 @@
                                     <span class="w-3 h-3 bg-green-400 rounded-full"></span>
                                 </div>
                             </div>
-                            
+
                             <div class="space-y-4">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-2 h-2 bg-green-400 rounded-full pulse-slow"></div>
                                     <span class="text-sm text-gray-600">Algoritma Jaccard Similarity</span>
                                 </div>
                                 <div class="flex items-center space-x-3">
-                                    <div class="w-2 h-2 bg-blue-400 rounded-full pulse-slow" style="animation-delay: 1s;"></div>
+                                    <div class="w-2 h-2 bg-blue-400 rounded-full pulse-slow"
+                                        style="animation-delay: 1s;"></div>
                                     <span class="text-sm text-gray-600">Algoritma Cosine Similarity</span>
                                 </div>
                                 <div class="flex items-center space-x-3">
-                                    <div class="w-2 h-2 bg-purple-400 rounded-full pulse-slow" style="animation-delay: 2s;"></div>
+                                    <div class="w-2 h-2 bg-purple-400 rounded-full pulse-slow"
+                                        style="animation-delay: 2s;"></div>
                                     <span class="text-sm text-gray-600">Pencarian Real-time</span>
                                 </div>
                             </div>
-                            
+
                             <div class="mt-6 p-4 bg-gray-50 rounded-lg">
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="text-xs text-gray-500">Akurasi Pencarian</span>
                                     <span class="text-xs font-medium text-green-600">95%</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full" style="width: 95%"></div>
+                                    <div class="bg-linear-to-r from-green-400 to-blue-500 h-2 rounded-full"
+                                        style="width: 95%"></div>
                                 </div>
                             </div>
                         </div>
@@ -191,7 +239,8 @@
                     Fitur Unggulan Kami
                 </h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Teknologi canggih untuk memudahkan pengelolaan dan pencarian arsip surat dengan metode Jaccard Similarity dan Cosine Similarity
+                    Teknologi canggih untuk memudahkan pengelolaan dan pencarian arsip surat dengan metode Jaccard
+                    Similarity dan Cosine Similarity
                 </p>
             </div>
 
@@ -206,9 +255,12 @@
                         Mengukur kemiripan berdasarkan irisan kata kunci antara dokumen query dan dokumen target.
                     </p>
                     <ul class="space-y-2 text-sm text-gray-600">
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Cocok untuk pencarian sederhana</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Perhitungan cepat</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Akurasi tinggi untuk kata kunci spesifik</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Cocok untuk
+                            pencarian sederhana</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Perhitungan
+                            cepat</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Akurasi tinggi
+                            untuk kata kunci spesifik</li>
                     </ul>
                 </div>
 
@@ -222,9 +274,12 @@
                         Menggunakan vektor TF-IDF untuk menghitung kemiripan berdasarkan bobot kata.
                     </p>
                     <ul class="space-y-2 text-sm text-gray-600">
-                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Lebih presisi</li>
-                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Mempertimbangkan bobot kata</li>
-                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Cocok untuk dokumen panjang</li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Lebih presisi
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Mempertimbangkan
+                            bobot kata</li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Cocok untuk
+                            dokumen panjang</li>
                     </ul>
                 </div>
 
@@ -238,9 +293,12 @@
                         Hasil pencarian langsung muncul saat Anda mengetik dengan performa optimal.
                     </p>
                     <ul class="space-y-2 text-sm text-gray-600">
-                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Respons cepat</li>
-                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Auto-suggestion</li>
-                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Filtering lanjutan</li>
+                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Respons cepat
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Auto-suggestion
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Filtering
+                            lanjutan</li>
                     </ul>
                 </div>
             </div>
@@ -261,11 +319,10 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop" 
-                        alt="Digital Archive System" 
-                        class="rounded-2xl shadow-xl">
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"
+                        alt="Digital Archive System" class="rounded-2xl shadow-xl">
                 </div>
-                
+
                 <div class="space-y-6">
                     <div class="flex items-start space-x-4">
                         <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
@@ -273,10 +330,11 @@
                         </div>
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 mb-2">Performa Cepat</h3>
-                            <p class="text-gray-600">Pencarian dilakukan dalam hitungan milidetik dengan algoritma yang dioptimalkan.</p>
+                            <p class="text-gray-600">Pencarian dilakukan dalam hitungan milidetik dengan algoritma yang
+                                dioptimalkan.</p>
                         </div>
                     </div>
-                    
+
                     <div class="flex items-start space-x-4">
                         <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
                             <i class="fas fa-shield-alt text-green-600"></i>
@@ -286,7 +344,7 @@
                             <p class="text-gray-600">Data arsip tersimpan dengan aman menggunakan enkripsi terbaru.</p>
                         </div>
                     </div>
-                    
+
                     <div class="flex items-start space-x-4">
                         <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
                             <i class="fas fa-chart-line text-purple-600"></i>
@@ -337,7 +395,8 @@
                     <ul class="space-y-2 text-sm text-gray-400">
                         <li class="flex items-center"><i class="fas fa-envelope mr-2"></i>info@arsipdigital.com</li>
                         <li class="flex items-center"><i class="fas fa-phone mr-2"></i>+62 123 4567 890</li>
-                        <li class="flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>Pontianak, Indonesia</li>
+                        <li class="flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>Pontianak, Indonesia
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -350,7 +409,9 @@
     <script>
         // Smooth scrolling
         function scrollToSection(sectionId) {
-            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+            document.getElementById(sectionId).scrollIntoView({
+                behavior: 'smooth'
+            });
         }
 
         // function scrollToSearch() {
@@ -424,35 +485,35 @@
 
         // function displayResults(algorithm, results) {
         //     const container = document.getElementById(algorithm + 'Results');
-            
+
         //     if (results.length === 0) {
         //         container.innerHTML = '<div class="text-center py-8 text-gray-500">Tidak ada hasil ditemukan</div>';
         //         return;
         //     }
 
         //     container.innerHTML = results.map(result => `
-        //         <div class="result-card p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition cursor-pointer">
-        //             <div class="flex justify-between items-start mb-3">
-        //                 <h4 class="font-semibold text-gray-900 text-sm">${result.title}</h4>
-        //                 <span class="algorithm-badge ${algorithm === 'jaccard' ? 'jaccard-badge' : 'cosine-badge'}">
-        //                     ${result.similarity}% Match
-        //                 </span>
-        //             </div>
-        //             <p class="text-xs text-gray-600 mb-2">
-        //                 <i class="fas fa-hashtag mr-1"></i>${result.number} | 
-        //                 <i class="fas fa-calendar mr-1"></i>${formatDate(result.date)}
-        //             </p>
-        //             <p class="text-sm text-gray-700 mb-3">${result.description}</p>
-        //             <div class="flex justify-between items-center">
-        //                 <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-        //                     ${result.type === 'masuk' ? 'Surat Masuk' : 'Surat Keluar'}
-        //                 </span>
-        //                 <button class="text-blue-600 hover:text-blue-800 text-xs font-medium">
-        //                     Lihat Detail →
-        //                 </button>
-        //             </div>
-        //         </div>
-        //     `).join('');
+    //         <div class="result-card p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition cursor-pointer">
+    //             <div class="flex justify-between items-start mb-3">
+    //                 <h4 class="font-semibold text-gray-900 text-sm">${result.title}</h4>
+    //                 <span class="algorithm-badge ${algorithm === 'jaccard' ? 'jaccard-badge' : 'cosine-badge'}">
+    //                     ${result.similarity}% Match
+    //                 </span>
+    //             </div>
+    //             <p class="text-xs text-gray-600 mb-2">
+    //                 <i class="fas fa-hashtag mr-1"></i>${result.number} | 
+    //                 <i class="fas fa-calendar mr-1"></i>${formatDate(result.date)}
+    //             </p>
+    //             <p class="text-sm text-gray-700 mb-3">${result.description}</p>
+    //             <div class="flex justify-between items-center">
+    //                 <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
+    //                     ${result.type === 'masuk' ? 'Surat Masuk' : 'Surat Keluar'}
+    //                 </span>
+    //                 <button class="text-blue-600 hover:text-blue-800 text-xs font-medium">
+    //                     Lihat Detail →
+    //                 </button>
+    //             </div>
+    //         </div>
+    //     `).join('');
         // }
 
         // function updateStatistics() {
@@ -493,36 +554,45 @@
             box-shadow: 0 0 0 rgba(59, 130, 246, 0);
             transition: box-shadow 0.3s ease;
         }
+
         .search-glow-active {
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
         }
+
         .pulse-slow {
             animation: pulse 3s infinite;
         }
+
         .algorithm-card {
             background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
             border: 1px solid #e2e8f0;
             transition: all 0.3s ease;
         }
+
         .hover-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
+
         .result-card {
             transition: all 0.2s ease;
         }
+
         .result-card:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
+
         .algorithm-badge.jaccard-badge {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
         }
+
         .algorithm-badge.cosine-badge {
             background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
             color: white;
         }
     </style>
 </body>
+
 </html>

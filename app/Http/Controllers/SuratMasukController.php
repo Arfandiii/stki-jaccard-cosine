@@ -13,8 +13,8 @@ class SuratMasukController extends Controller
      */
     public function index()
     {
-        $surat = SuratMasuk::latest()->paginate(20);
-        return view('admin.surat-masuk.index', compact('surat'));
+        $suratMasuk = SuratMasuk::latest()->paginate(20);
+        return view('admin.surat-masuk.index', compact('suratMasuk'));
     }
 
     /**
@@ -68,7 +68,8 @@ class SuratMasukController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $surat = SuratMasuk::findOrFail($id);
+        return view('admin.surat-masuk.show', compact('surat'));
     }
 
     /**
@@ -76,7 +77,8 @@ class SuratMasukController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $surat = SuratMasuk::findOrFail($id);
+        return view('admin.surat-masuk.edit', compact('surat'));
     }
 
     /**
