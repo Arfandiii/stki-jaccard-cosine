@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\DocumentTerm;
 use App\Helpers\PreprocessingText;
+use Illuminate\Support\Facades\Log;
 
 class SuratMasuk extends Model
 {
@@ -20,20 +21,19 @@ class SuratMasuk extends Model
 
     public function generateTerms(): void
     {
-        // 1. bersihkan lama
-        DocumentTerm::where([
-            'doc_id'   => $this->id,
-            'doc_type' => 'masuk'
-        ])->delete();
+        Log::info('generateTerms dipanggil', ['id' => $this->id, 'perihal' => $this->perihal]);
 
-        // 2. preprocessing
+        DocumentTerm::where(['doc_id' => $this->id, 'doc_type' => 'masuk'])->delete();
+
         $tokens = PreprocessingText::preprocessText($this->perihal);
-        if (!$tokens) return;
+        Log::info('tokens', $tokens);
 
-        // 3. frekuensi
+        if (!$tokens) {
+            Log::info('kosong, return');
+            return;
+        }
+
         $freq = array_count_values($tokens);
-
-        // 4. simpan baru
         foreach ($freq as $term => $tf) {
             DocumentTerm::create([
                 'doc_id'   => $this->id,
@@ -41,6 +41,7 @@ class SuratMasuk extends Model
                 'term'     => $term,
                 'tf'       => $tf
             ]);
+            Log::info("insert", ['term' => $term, 'tf' => $tf]);
         }
     }
 }

@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Temu Kembali Informasi Pencarian Arsip Surat</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite('resources/css/app.css')
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @keyframes float {
@@ -65,9 +66,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0">
+                    <div class="shrink-0">
                         <div class="flex items-center">
-                            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <div class="w-8 h-8 bg-linear-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                                 <i class="fas fa-archive text-white text-sm"></i>
                             </div>
                             <span class="ml-2 text-xl font-bold gradient-text">Arsip Surat</span>
@@ -84,7 +85,7 @@
                 </div>
 
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('login')}}" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition">
+                    <a href="{{ route('login')}}" class="bg-linear-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition">
                         <i class="#"></i>Login
                     </a>
                     <button class="md:hidden text-gray-700" onclick="toggleMobileMenu()">
@@ -261,13 +262,13 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
                     <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop" 
-                         alt="Digital Archive System" 
-                         class="rounded-2xl shadow-xl">
+                        alt="Digital Archive System" 
+                        class="rounded-2xl shadow-xl">
                 </div>
                 
                 <div class="space-y-6">
                     <div class="flex items-start space-x-4">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
                             <i class="fas fa-rocket text-blue-600"></i>
                         </div>
                         <div>
@@ -277,7 +278,7 @@
                     </div>
                     
                     <div class="flex items-start space-x-4">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
                             <i class="fas fa-shield-alt text-green-600"></i>
                         </div>
                         <div>
@@ -287,7 +288,7 @@
                     </div>
                     
                     <div class="flex items-start space-x-4">
-                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
                             <i class="fas fa-chart-line text-purple-600"></i>
                         </div>
                         <div>

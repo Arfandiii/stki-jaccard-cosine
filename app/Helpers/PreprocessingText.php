@@ -32,8 +32,8 @@ class PreprocessingText
     /* ---------- Langkah-langkah ---------- */
     private static function tokenize(string $text): array
     {
-        $text = preg_replace('/\b\d+[\.\)]/', '', $text);           // hapus 1. 2)
-        $text = preg_replace('/[^\p{L}\s]+/u', ' ', $text);        // hapus simbol
+        $text = preg_replace('/\b\d+[\.\)]/', '', $text);
+        $text = preg_replace('/[^\p{L}\s]+/u', ' ', $text);
         return preg_split('/\s+/', mb_strtolower($text), -1, PREG_SPLIT_NO_EMPTY);
     }
 
