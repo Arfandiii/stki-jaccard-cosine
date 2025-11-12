@@ -31,8 +31,17 @@
 
     <!-- MAX SIDEBAR-->
     <div class="max hidden text-white mt-20 flex-col space-y-2 w-full h-[calc(100vh)]">
-        <a href="#">
+        <a href="{{ route('dashboard') }}">
             <x-nav-link-admin iconType="dashboard">Dashboard</x-nav-link-admin>
+        </a>
+        <a href="{{ route('admin.surat-masuk.index') }}">
+            <x-nav-link-admin iconType="surat-masuk">Surat Masuk</x-nav-link-admin>
+        </a>
+        <a href="{{ route('admin.surat-keluar.index') }}">
+            <x-nav-link-admin iconType="surat-keluar">Surat Keluar</x-nav-link-admin>
+        </a>
+        <a href="{{ route('search') }}">
+            <x-nav-link-admin iconType="search">Cari Surat</x-nav-link-admin>
         </a>
         <form action="#" method="post" class="border-t-2 border-blue-200 pt-2">
             @csrf
@@ -44,8 +53,17 @@
     </div>
     <!-- MINI SIDEBAR-->
     <div class="mini mt-20 flex flex-col space-y-2 w-full h-[calc(100vh)]">
-        <a href="#">
+        <a href="{{ route('dashboard') }}">
             <x-nav-link-mini-admin iconType="dashboard"></x-nav-link-mini-admin>
+        </a>
+        <a href="{{ route('admin.surat-masuk.index') }}">
+            <x-nav-link-mini-admin iconType="surat-masuk"></x-nav-link-mini-admin>
+        </a>
+        <a href="{{ route('admin.surat-keluar.index') }}">
+            <x-nav-link-mini-admin iconType="surat-keluar"></x-nav-link-mini-admin>
+        </a>
+        <a href="{{ route('search') }}">
+            <x-nav-link-mini-admin iconType="search"></x-nav-link-mini-admin>
         </a>
         <form action="#" method="post" class="border-t-2 border-blue-200 pt-2">
             @csrf

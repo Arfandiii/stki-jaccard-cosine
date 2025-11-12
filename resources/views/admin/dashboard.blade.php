@@ -5,9 +5,9 @@
     <div class="content ml-12 transform ease-in-out duration-500 pt-20 px-2 md:px-5 pb-4">
         <div class="flex flex-wrap w-full my-5 -mx-2">
             <div class="w-full md:w-1/2 lg:w-1/2 p-2">
-                <a href="#">
+                <a href="{{ route('admin.surat-masuk.index') }}">
                     <div
-                        class="flex items-center flex-row w-full hover:shadow hover:bg-linear-to-r from-blue-500 to-purple-600 bg-blue-600 transform ease-in-out duration-500 rounded-md p-3">
+                        class="flex items-center flex-row w-full hover:shadow  hover:bg-blue-500 bg-blue-600 rounded-md p-3">
                         <div
                             class="flex text-blue-600 items-center bg-white p-2 rounded-md flex-none w-8 h-8 md:w-12 md:h-12 ">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2"

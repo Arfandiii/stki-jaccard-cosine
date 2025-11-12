@@ -17,7 +17,8 @@ Route::get('/login', function () {
     return view('admin.auth.login');
 })->name('login');
 
-Route::get('/dashboard-admin', [AdminDashboardController::class, 'index'])->name('dashboard');
+Route::get('/admin', [AdminDashboardController::class, 'index'])->name('dashboard');
+Route::get('/admin/search', [AdminDashboardController::class, 'search'])->name('search');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('surat-keluar', SuratKeluarController::class);
