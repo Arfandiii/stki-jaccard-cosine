@@ -23,5 +23,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(SuratMasukSeeder::class);
+        $this->call(SuratKeluarSeeder::class);
     }
 }
