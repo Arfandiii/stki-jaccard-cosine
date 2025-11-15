@@ -414,139 +414,146 @@
             });
         }
 
-        // function scrollToSearch() {
-        //     document.getElementById('search').scrollIntoView({ behavior: 'smooth' });
-        // }
+        function scrollToSearch() {
+            document.getElementById('search').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
 
-        // // Search functionality
-        // async function performSearch() {
-        //     const query = document.getElementById('searchInput').value;
-        //     const jenis = document.getElementById('jenisSurat').value;
-        //     const tanggalMulai = document.getElementById('tanggalMulai').value;
-        //     const tanggalSelesai = document.getElementById('tanggalSelesai').value;
+        // Search functionality
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value;
+            const jenis = document.getElementById('jenisSurat').value;
+            const tanggalMulai = document.getElementById('tanggalMulai').value;
+            const tanggalSelesai = document.getElementById('tanggalSelesai').value;
 
-        //     if (!query.trim()) {
-        //         alert('Silakan masukkan kata kunci pencarian');
-        //         return;
-        //     }
+            if (!query.trim()) {
+                alert('Silakan masukkan kata kunci pencarian');
+                return;
+            }
 
-        //     // Show loading state
-        //     document.getElementById('searchResults').classList.remove('hidden');
-        //     document.getElementById('jaccardResults').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i></div>';
-        //     document.getElementById('cosineResults').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i></div>';
+            // Show loading state
+            document.getElementById('searchResults').classList.remove('hidden');
+            document.getElementById('jaccardResults').innerHTML =
+                '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i></div>';
+            document.getElementById('cosineResults').innerHTML =
+                '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i></div>';
 
-        //     try {
-        //         // Simulate search results
-        //         setTimeout(() => {
-        //             displayResults('jaccard', generateMockResults('jaccard', query));
-        //             displayResults('cosine', generateMockResults('cosine', query));
-        //             updateStatistics();
-        //         }, 2000);
+            try {
+                // Simulate search results
+                setTimeout(() => {
+                    displayResults('jaccard', generateMockResults('jaccard', query));
+                    displayResults('cosine', generateMockResults('cosine', query));
+                    updateStatistics();
+                }, 2000);
 
-        //     } catch (error) {
-        //         console.error('Search error:', error);
-        //         alert('Terjadi kesalahan saat mencari. Silakan coba lagi.');
-        //     }
-        // }
+            } catch (error) {
+                console.error('Search error:', error);
+                alert('Terjadi kesalahan saat mencari. Silakan coba lagi.');
+            }
+        }
 
-        // function generateMockResults(algorithm, query) {
-        //     const mockData = [
-        //         {
-        //             title: 'Surat Undangan Rapat Koordinasi',
-        //             number: '001/ARSIP/2024',
-        //             date: '2024-01-15',
-        //             description: 'Surat undangan untuk rapat koordinasi bulanan departemen',
-        //             similarity: algorithm === 'jaccard' ? 85 : 92,
-        //             type: 'masuk'
-        //         },
-        //         {
-        //             title: 'Notulensi Hasil Rapat',
-        //             number: '002/ARSIP/2024',
-        //             date: '2024-01-16',
-        //             description: 'Notulensi lengkap hasil rapat koordinasi yang telah dilaksanakan',
-        //             similarity: algorithm === 'jaccard' ? 72 : 78,
-        //             type: 'keluar'
-        //         },
-        //         {
-        //             title: 'Surat Edaran Rapat',
-        //             number: '003/ARSIP/2024',
-        //             date: '2024-01-17',
-        //             description: 'Edaran informasi terkait jadwal dan agenda rapat',
-        //             similarity: algorithm === 'jaccard' ? 65 : 71,
-        //             type: 'keluar'
-        //         }
-        //     ];
+        function generateMockResults(algorithm, query) {
+            const mockData = [{
+                    title: 'Surat Undangan Rapat Koordinasi',
+                    number: '001/ARSIP/2024',
+                    date: '2024-01-15',
+                    description: 'Surat undangan untuk rapat koordinasi bulanan departemen',
+                    similarity: algorithm === 'jaccard' ? 85 : 92,
+                    type: 'masuk'
+                },
+                {
+                    title: 'Notulensi Hasil Rapat',
+                    number: '002/ARSIP/2024',
+                    date: '2024-01-16',
+                    description: 'Notulensi lengkap hasil rapat koordinasi yang telah dilaksanakan',
+                    similarity: algorithm === 'jaccard' ? 72 : 78,
+                    type: 'keluar'
+                },
+                {
+                    title: 'Surat Edaran Rapat',
+                    number: '003/ARSIP/2024',
+                    date: '2024-01-17',
+                    description: 'Edaran informasi terkait jadwal dan agenda rapat',
+                    similarity: algorithm === 'jaccard' ? 65 : 71,
+                    type: 'keluar'
+                }
+            ];
 
-        //     return mockData.filter(item => 
-        //         item.title.toLowerCase().includes(query.toLowerCase()) ||
-        //         item.description.toLowerCase().includes(query.toLowerCase())
-        //     );
-        // }
+            return mockData.filter(item =>
+                item.title.toLowerCase().includes(query.toLowerCase()) ||
+                item.description.toLowerCase().includes(query.toLowerCase())
+            );
+        }
 
-        // function displayResults(algorithm, results) {
-        //     const container = document.getElementById(algorithm + 'Results');
+        function displayResults(algorithm, results) {
+            const container = document.getElementById(algorithm + 'Results');
 
-        //     if (results.length === 0) {
-        //         container.innerHTML = '<div class="text-center py-8 text-gray-500">Tidak ada hasil ditemukan</div>';
-        //         return;
-        //     }
+            if (results.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">Tidak ada hasil ditemukan</div>';
+                return;
+            }
 
-        //     container.innerHTML = results.map(result => `
-    //         <div class="result-card p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition cursor-pointer">
-    //             <div class="flex justify-between items-start mb-3">
-    //                 <h4 class="font-semibold text-gray-900 text-sm">${result.title}</h4>
-    //                 <span class="algorithm-badge ${algorithm === 'jaccard' ? 'jaccard-badge' : 'cosine-badge'}">
-    //                     ${result.similarity}% Match
-    //                 </span>
-    //             </div>
-    //             <p class="text-xs text-gray-600 mb-2">
-    //                 <i class="fas fa-hashtag mr-1"></i>${result.number} | 
-    //                 <i class="fas fa-calendar mr-1"></i>${formatDate(result.date)}
-    //             </p>
-    //             <p class="text-sm text-gray-700 mb-3">${result.description}</p>
-    //             <div class="flex justify-between items-center">
-    //                 <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-    //                     ${result.type === 'masuk' ? 'Surat Masuk' : 'Surat Keluar'}
-    //                 </span>
-    //                 <button class="text-blue-600 hover:text-blue-800 text-xs font-medium">
-    //                     Lihat Detail →
-    //                 </button>
-    //             </div>
-    //         </div>
-    //     `).join('');
-        // }
+            container.innerHTML = results.map(result => `
+            <div class="result-card p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition cursor-pointer">
+                <div class="flex justify-between items-start mb-3">
+                    <h4 class="font-semibold text-gray-900 text-sm">${result.title}</h4>
+                    <span class="algorithm-badge ${algorithm === 'jaccard' ? 'jaccard-badge' : 'cosine-badge'}">
+                        ${result.similarity}% Match
+                    </span>
+                </div>
+                <p class="text-xs text-gray-600 mb-2">
+                    <i class="fas fa-hashtag mr-1"></i>${result.number} | 
+                    <i class="fas fa-calendar mr-1"></i>${formatDate(result.date)}
+                </p>
+                <p class="text-sm text-gray-700 mb-3">${result.description}</p>
+                <div class="flex justify-between items-center">
+                    <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
+                        ${result.type === 'masuk' ? 'Surat Masuk' : 'Surat Keluar'}
+                    </span>
+                    <button class="text-blue-600 hover:text-blue-800 text-xs font-medium">
+                        Lihat Detail →
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        }
 
-        // function updateStatistics() {
-        //     // Update counts (mock data)
-        //     document.getElementById('jaccardCount').textContent = '3';
-        //     document.getElementById('cosineCount').textContent = '3';
-        //     document.getElementById('avgJaccard').textContent = '74%';
-        //     document.getElementById('avgCosine').textContent = '80%';
-        // }
+        function updateStatistics() {
+            // Update counts (mock data)
+            document.getElementById('jaccardCount').textContent = '3';
+            document.getElementById('cosineCount').textContent = '3';
+            document.getElementById('avgJaccard').textContent = '74%';
+            document.getElementById('avgCosine').textContent = '80%';
+        }
 
-        // function formatDate(dateString) {
-        //     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        //     return new Date(dateString).toLocaleDateString('id-ID', options);
-        // }
+        function formatDate(dateString) {
+            const options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        }
 
-        // // Add keyboard shortcut
-        // document.addEventListener('DOMContentLoaded', function() {
-        //     document.addEventListener('keydown', function(e) {
-        //         if (e.ctrlKey && e.key === '/') {
-        //             e.preventDefault();
-        //             document.getElementById('searchInput').focus();
-        //         }
-        //     });
-        // });
+        // Add keyboard shortcut
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === '/') {
+                    e.preventDefault();
+                    document.getElementById('searchInput').focus();
+                }
+            });
+        });
 
-        // // Add search glow effect
-        // const searchInput = document.getElementById('searchInput');
-        // searchInput.addEventListener('focus', function() {
-        //     this.classList.add('search-glow-active');
-        // });
-        // searchInput.addEventListener('blur', function() {
-        //     this.classList.remove('search-glow-active');
-        // });
+        // Add search glow effect
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('focus', function() {
+            this.classList.add('search-glow-active');
+        });
+        searchInput.addEventListener('blur', function() {
+            this.classList.remove('search-glow-active');
+        });
     </script>
 
     <style>

@@ -1,19 +1,23 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Models\SuratKeluar;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\SuratKeluar;
+use App\Models\SuratMasuk;
 
-class SuratKeluarController extends Controller
+class AdminDashboardController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $suratKeluar = SuratKeluar::latest()->paginate(10);
-        return view('admin.surat-keluar.index', compact('suratKeluar'));
+        $totalSuratMasuk = count(SuratMasuk::all());
+        $totalSuratKeluar = count(SuratKeluar::all());
+
+        return view('admin.dashboard', compact('totalSuratMasuk', 'totalSuratKeluar'));
     }
 
     /**
@@ -21,7 +25,7 @@ class SuratKeluarController extends Controller
      */
     public function create()
     {
-        return view('admin.surat-keluar.create');
+        //
     }
 
     /**
@@ -62,5 +66,10 @@ class SuratKeluarController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function search()
+    {
+        return view('admin.search');
     }
 }

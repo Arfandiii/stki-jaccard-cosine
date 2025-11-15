@@ -1,17 +1,20 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Models\SuratKeluar;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
-class AdminDashboardController extends Controller
+class SuratKeluarController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('admin.dashboard');
+        $suratKeluar = SuratKeluar::latest()->paginate(10);
+        return view('admin.surat-keluar.index', compact('suratKeluar'));
     }
 
     /**
@@ -19,7 +22,7 @@ class AdminDashboardController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.surat-keluar.create');
     }
 
     /**
@@ -60,10 +63,5 @@ class AdminDashboardController extends Controller
     public function destroy(string $id)
     {
         //
-    }
-
-    public function search()
-    {
-        return view('admin.search');
     }
 }
