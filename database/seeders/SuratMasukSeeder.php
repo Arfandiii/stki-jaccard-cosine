@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\SuratMasuk;
+use App\Models\JenisSuratMasuk;
+
 
 class SuratMasukSeeder extends Seeder
 {
@@ -714,11 +716,21 @@ class SuratMasukSeeder extends Seeder
             ['nomor_surat'=>'470/322/SJ/2025','tanggal_surat'=>'2025-10-20','tanggal_terima'=>'2025-10-22','asal_surat'=>'Kelurahan Sungai Jawi - Kecamatan Pontianak Utara','perihal'=>'Permohonan Bantuan Perbaikan Rumah - Untuk Verifikasi (Karang Taruna) - No.473','jenis_surat'=>'Surat Pengajuan'],
             ['nomor_surat'=>'470/323/SH/2025','tanggal_surat'=>'2025-10-22','tanggal_terima'=>'2025-10-22','asal_surat'=>'Kelurahan Siantan Hulu - Kecamatan Pontianak Utara','perihal'=>'Laporan Pelanggaran Tata Ruang - Pengajuan Tahun Anggaran (Sekolah Dasar Negeri 5) - No.253','jenis_surat'=>'Surat Pengajuan'],
             ['nomor_surat'=>'470/324/SB/2025','tanggal_surat'=>'2025-10-22','tanggal_terima'=>'2025-10-22','asal_surat'=>'Kelurahan Siantan Barat - Kecamatan Pontianak Utara','perihal'=>'Permohonan Pembuatan KTP Elektronik - Untuk Verifikasi (Kelompok PKK) - No.339','jenis_surat'=>'Surat Pengaduan'],
-
         ];
 
-        foreach ($data as $row) {
-            SuratMasuk::create($row);   // otomatis generate document_terms
+        foreach ($data as $item) {
+
+            // cari id jenis surat berdasarkan nama_jenis
+            $jenis = JenisSuratMasuk::where('nama_jenis', $item['jenis_surat'])->first();
+
+            SuratMasuk::create([
+                'nomor_surat'      => $item['nomor_surat'],
+                'tanggal_surat'    => $item['tanggal_surat'],
+                'tanggal_terima'   => $item['tanggal_terima'],
+                'asal_surat'       => $item['asal_surat'],
+                'perihal'          => $item['perihal'],
+                'jenis_surat_id'   => $jenis?->id, // aman walau null
+            ]);
         }
     }
 }

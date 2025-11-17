@@ -67,9 +67,12 @@
                             <select name="jenis_surat" required
                                 class="mt-2 w-full rounded-lg border-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-md outline-1 outline-blue-400 transition focus:outline-none px-2 py-1">
                                 <option value="" disabled selected>Pilih jenis</option>
-                                <option value="resmi">Resmi</option>
-                                <option value="undangan">Undangan</option>
-                                <option value="lainnya">Lainnya</option>
+                                @foreach ($jenisSurat as $j)
+                                    <option value="{{ $j->id }}"
+                                        {{ isset($surat) && $surat->jenis_surat_id == $j->id ? 'selected' : '' }}>
+                                        {{ $j->nama_jenis }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
 

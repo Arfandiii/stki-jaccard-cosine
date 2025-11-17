@@ -45,8 +45,11 @@
                                         <td class="px-4 py-2 text-sm text-gray-700">
                                             {{ \Carbon\Carbon::parse($surat->tanggal_terima)->format('d-m-Y') }}</td>
                                         <td class="px-4 py-2 text-sm text-gray-700">{{ $surat->asal_surat }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-700">{{ $surat->perihal }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-700">{{ $surat->jenis_surat }}</td>
+                                        <td class="px-4 py-2 text-sm text-gray-700">
+                                            {{ Str::words($surat->perihal, 10, '...') }}</td>
+                                        <td class="px-4 py-2 text-sm text-gray-700">
+                                            {{ $surat->jenisSurat->nama_jenis ?? '-' }}
+                                        </td>
                                         <td class="px-4 py-2 text-sm">
                                             @if ($surat->file_path)
                                                 <a href="{{ Storage::url($surat->file_path) }}" target="_blank"

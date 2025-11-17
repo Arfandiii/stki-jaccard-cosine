@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class SuratMasuk extends Model
 {
     protected $table = 'surat_masuk';
-    protected $fillable = ['nomor_surat','tanggal_surat','tanggal_terima','asal_surat','perihal','jenis_surat','file_path'];
+    protected $fillable = ['nomor_surat','tanggal_surat','tanggal_terima','asal_surat','perihal','jenis_surat_id','file_path'];
     protected $casts = [
     'tanggal_surat'  => 'date:Y-m-d',
     'tanggal_terima' => 'date:Y-m-d',
@@ -46,5 +46,10 @@ class SuratMasuk extends Model
             ]);
             Log::info("insert", ['term' => $term, 'tf' => $tf]);
         }
+    }
+
+    public function jenisSurat()
+    {
+        return $this->belongsTo(JenisSuratMasuk::class, 'jenis_surat_id');
     }
 }

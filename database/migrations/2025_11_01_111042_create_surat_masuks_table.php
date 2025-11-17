@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('tanggal_terima');
             $table->string('asal_surat');
             $table->text('perihal');
-            $table->string('jenis_surat')->nullable();
+            $table->foreignId('jenis_surat_id')->nullable()->constrained('jenis_surat_masuk')->nullOnDelete();
             $table->string('file_path')->nullable();
             $table->timestamps();
         });

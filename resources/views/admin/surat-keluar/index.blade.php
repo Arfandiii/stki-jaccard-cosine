@@ -9,7 +9,7 @@
                         <h2 class="text-xl font-semibold text-gray-700">Daftar Surat Keluar</h2>
                         <a href="{{ route('admin.surat-keluar.create') }}"
                             class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
-                            + Tambah Surat
+                            + Tambah Surat Keluar
                         </a>
                     </div>
 
@@ -25,13 +25,16 @@
                                         Nomor Surat</th>
                                     <th
                                         class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Tanggal Kirim</th>
+                                    <th
+                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Tujuan</th>
                                     <th
                                         class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Perihal</th>
                                     <th
                                         class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Tanggal Kirim</th>
+                                        Penanggung Jawab</th>
                                     <th
                                         class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Aksi</th>
@@ -44,10 +47,11 @@
                                             {{ $loop->index + 1 + ($suratKeluar->currentPage() - 1) * $suratKeluar->perPage() }}
                                         </td>
                                         <td class="px-4 py-2 text-sm text-gray-700">{{ $surat->nomor_surat }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-700">{{ $surat->tujuan }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-700">{{ $surat->perihal }}</td>
                                         <td class="px-4 py-2 text-sm text-gray-700">
                                             {{ \Carbon\Carbon::parse($surat->tanggal_kirim)->format('d-m-Y') }}</td>
+                                        <td class="px-4 py-2 text-sm text-gray-700">{{ $surat->tujuan_surat }}</td>
+                                        <td class="px-4 py-2 text-sm text-gray-700">{{ $surat->perihal }}</td>
+                                        <td class="px-4 py-2 text-sm text-gray-700">{{ $surat->penanggung_jawab }}</td>
                                         <td class="px-4 py-2 text-sm flex space-x-2">
                                             <a href="{{ route('admin.surat-keluar.show', $surat->id) }}"
                                                 class="text-blue-600 hover:underline">Lihat</a>

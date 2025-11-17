@@ -24,7 +24,9 @@ class DatabaseSeeder extends Seeder
             'password' => 'password',
         ]);
 
-        $this->call(SuratMasukSeeder::class);
-        $this->call(SuratKeluarSeeder::class);
+        $this->call([
+            JenisSuratMasukSeeder::class,
+            SuratMasukSeeder::class,
+            SuratKeluarSeeder::class,]); 
     }
 }

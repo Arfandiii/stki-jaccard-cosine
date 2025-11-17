@@ -133,7 +133,7 @@
 
                     <!-- Tombol aksi (SAMA DENGAN CREATE) -->
                     <div class="flex justify-end space-x-3 mt-8">
-                        <a href="{{ route('admin.surat-masuk.show', $surat->id) }}"
+                        <a href="{{ route('admin.surat-masuk.index', $surat->id) }}"
                             class="px-5 py-2.5 rounded-lg border border-gray-400 hover:bg-gray-100 transition">
                             Batal
                         </a>

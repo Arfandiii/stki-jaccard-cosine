@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Models\SuratMasuk;
 use App\Http\Controllers\Controller;
+use App\Models\JenisSuratMasuk;
 use Illuminate\Support\Facades\Storage;
 
 class SuratMasukController extends Controller
@@ -23,7 +24,9 @@ class SuratMasukController extends Controller
      */
     public function create()
     {
-        return view('admin.surat-masuk.create');
+        $jenisSurat = JenisSuratMasuk::all(); // ambil semua jenis surat
+
+        return view('admin.surat-masuk.create', compact('jenisSurat'));
     }
 
     /**
@@ -33,35 +36,30 @@ class SuratMasukController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nomor_surat'   => 'required|string|max:100',
+            'nomor_surat' => 'required',
             'tanggal_surat' => 'required|date',
-            'tanggal_terima'=> 'required|date|after_or_equal:tanggal_surat',
-            'asal_surat'    => 'required|string|max:255',
-            'perihal'       => 'required|string',
-            'jenis_surat'   => 'required|string|max:100',
-            'file'          => 'nullable|mimes:pdf|max:2048', // 2 MB
+            'tanggal_terima' => 'required|date',
+            'asal_surat' => 'required',
+            'perihal' => 'required',
+            'jenis_surat' => 'required|exists:jenis_surat_masuk,id', 
+            'file_path' => 'nullable|file|mimes:pdf,jpg,png,doc,docx'
         ]);
 
-        // upload PDF (jika ada)
-        $path = null;
-        if ($request->hasFile('file')) {
-            $path = $request->file('file')->store('scans/surat-masuk');
-        }
-
-        // simpan ke DB (otomatis memicu event booted → generateTerms)
         SuratMasuk::create([
-            'nomor_surat'   => $request->nomor_surat,
+            'nomor_surat' => $request->nomor_surat,
             'tanggal_surat' => $request->tanggal_surat,
-            'tanggal_terima'=> $request->tanggal_terima,
-            'asal_surat'    => $request->asal_surat,
-            'perihal'       => $request->perihal,
-            'jenis_surat'   => $request->jenis_surat,
-            'file_path'     => $path,
+            'tanggal_terima' => $request->tanggal_terima,
+            'asal_surat' => $request->asal_surat,
+            'perihal' => $request->perihal,
+            'jenis_surat_id' => $request->jenis_surat, // pakai ID
+            'file_path' => $request->file('file_path')
+                ? $request->file('file_path')->store('surat_masuk')
+                : null,
         ]);
 
-        return redirect()->route('surat-masuk.index')
-                        ->with('success', 'Surat masuk berhasil disimpan & diindeks.');
+        return redirect()->route('admin.surat-masuk.index')->with('success', 'Surat berhasil ditambahkan');
     }
+
 
 
     /**
