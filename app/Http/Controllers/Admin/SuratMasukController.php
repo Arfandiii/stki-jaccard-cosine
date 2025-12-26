@@ -41,9 +41,16 @@ class SuratMasukController extends Controller
             'tanggal_terima' => 'required|date',
             'asal_surat' => 'required',
             'perihal' => 'required',
-            'jenis_surat' => 'required|exists:jenis_surat_masuk,id', 
-            'file_path' => 'nullable|file|mimes:pdf,jpg,png,doc,docx'
+            'jenis_surat' => 'required|exists:jenis_surat_masuk,id',
+            'file' => 'nullable|file|mimes:pdf,jpg,png,doc,docx|max:2048'
         ]);
+
+        $filePath = null;
+
+        if ($request->hasFile('file')) {
+            // simpan file secara benar
+            $filePath = $request->file('file')->store('surat_masuk', 'public');
+        }
 
         SuratMasuk::create([
             'nomor_surat' => $request->nomor_surat,
@@ -51,13 +58,12 @@ class SuratMasukController extends Controller
             'tanggal_terima' => $request->tanggal_terima,
             'asal_surat' => $request->asal_surat,
             'perihal' => $request->perihal,
-            'jenis_surat_id' => $request->jenis_surat, // pakai ID
-            'file_path' => $request->file('file_path')
-                ? $request->file('file_path')->store('surat_masuk')
-                : null,
+            'jenis_surat_id' => $request->jenis_surat,
+            'file_path' => $filePath, // masukkan path-nya saja
         ]);
 
-        return redirect()->route('admin.surat-masuk.index')->with('success', 'Surat berhasil ditambahkan');
+        return redirect()->route('admin.surat-masuk.index')
+            ->with('success', 'Surat berhasil ditambahkan');
     }
 
 
@@ -77,22 +83,61 @@ class SuratMasukController extends Controller
     public function edit(string $id)
     {
         $surat = SuratMasuk::findOrFail($id);
-        return view('admin.surat-masuk.edit', compact('surat'));
+        $jenisSurat = JenisSuratMasuk::all(); // ambil semua jenis surat
+        return view('admin.surat-masuk.edit', compact('surat', 'jenisSurat'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $surat = SuratMasuk::findOrFail($id);
+
+        $request->validate([
+            'nomor_surat' => 'required',
+            'tanggal_surat' => 'required|date',
+            'tanggal_terima' => 'required|date',
+            'asal_surat' => 'required',
+            'perihal' => 'required',
+            'jenis_surat' => 'required|exists:jenis_surat_masuk,id',
+            'file' => 'nullable|file|mimes:pdf,jpg,png,doc,docx|max:2048'
+        ]);
+
+        $filePath = $surat->file_path;
+
+        if ($request->hasFile('file')) {
+
+            if ($surat->file_path && Storage::disk('public')->exists($surat->file_path)) {
+                Storage::disk('public')->delete($surat->file_path);
+            }
+
+            $filePath = $request->file('file')->store('surat_masuk', 'public');
+        }
+
+        $surat->update([
+            'nomor_surat' => $request->nomor_surat,
+            'tanggal_surat' => $request->tanggal_surat,
+            'tanggal_terima' => $request->tanggal_terima,
+            'asal_surat' => $request->asal_surat,
+            'perihal' => $request->perihal,
+            'jenis_surat_id' => $request->jenis_surat,
+            'file_path' => $filePath
+        ]);
+
+        return redirect()->route('admin.surat-masuk.index')
+            ->with('success', 'Surat berhasil diperbarui');
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //
+        $surat = SuratMasuk::findOrFail($id);
+        Storage::delete($surat->file_path);
+        $surat->delete();
+        return redirect()->route('admin.surat-masuk.index')->with('success', 'Surat berhasil dihapus');
     }
 }

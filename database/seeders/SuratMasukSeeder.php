@@ -2,10 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Helpers\PreprocessingText;
 use Illuminate\Database\Seeder;
 use App\Models\SuratMasuk;
 use App\Models\JenisSuratMasuk;
+use App\Models\SuratTerm;
 
 
 class SuratMasukSeeder extends Seeder
@@ -719,18 +720,34 @@ class SuratMasukSeeder extends Seeder
         ];
 
         foreach ($data as $item) {
-
-            // cari id jenis surat berdasarkan nama_jenis
+            /* 1. cari id jenis surat */
             $jenis = JenisSuratMasuk::where('nama_jenis', $item['jenis_surat'])->first();
 
-            SuratMasuk::create([
-                'nomor_surat'      => $item['nomor_surat'],
-                'tanggal_surat'    => $item['tanggal_surat'],
-                'tanggal_terima'   => $item['tanggal_terima'],
-                'asal_surat'       => $item['asal_surat'],
-                'perihal'          => $item['perihal'],
-                'jenis_surat_id'   => $jenis?->id, // aman walau null
+            /* 2. insert surat_masuk */
+            $surat = SuratMasuk::create([
+                'nomor_surat'    => $item['nomor_surat'],
+                'tanggal_surat'  => $item['tanggal_surat'],
+                'tanggal_terima' => $item['tanggal_terima'],
+                'asal_surat'     => $item['asal_surat'],
+                'perihal'        => $item['perihal'],
+                'jenis_surat_id' => $jenis?->id,
+                'file_path'      => null,     // atau path dummy jika ada
             ]);
+
+            /* 3. preprocessing -> surat_terms */
+            $terms = PreprocessingText::preprocessText($item['perihal']);
+            $this->insertTerms('masuk', $surat->id, $terms);
+        }
+    }
+
+    /* helper simpan ke surat_terms (TF saat ini) */
+    private function insertTerms(string $type, int $suratId, array $terms): void
+    {
+        foreach (array_count_values($terms) as $term => $tf) {
+            SuratTerm::updateOrCreate(
+                ['surat_type' => $type, 'surat_id' => $suratId, 'term' => $term],
+                ['tf' => $tf]        // tfidf diisi nanti
+            );
         }
     }
 }

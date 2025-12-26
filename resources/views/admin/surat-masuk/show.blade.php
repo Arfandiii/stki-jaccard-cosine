@@ -20,7 +20,7 @@
         </div>
 
         <!-- Header Card -->
-        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-5 shadow-lg">
+        <div class="bg-linear-to-r from-blue-500 to-indigo-600 px-6 py-5 shadow-lg">
             <div class="flex items-center space-x-3 text-white">
                 <svg class="w-8 h-8 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -73,7 +73,7 @@
                         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Kategori
                             Surat</label>
                         <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                            {{ $surat->kategori->nama ?? '-' }}
+                            {{ $surat->jenisSurat->nama_jenis ?? '-' }}
                         </span>
                     </div>
 

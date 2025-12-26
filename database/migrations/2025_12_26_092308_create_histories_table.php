@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('document_terms', function (Blueprint $table) {
+        Schema::create('histories', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('doc_id');
-            $table->enum('doc_type',['masuk','keluar']);
-            $table->string('term');
-            $table->unsignedInteger('tf')->default(1);
-            $table->unique(['doc_id','doc_type','term']);
+            $table->timestamps();
         });
     }
 
@@ -26,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('document_terms');
+        Schema::dropIfExists('histories');
     }
 };

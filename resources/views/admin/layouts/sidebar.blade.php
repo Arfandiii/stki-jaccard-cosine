@@ -43,7 +43,13 @@
         <a href="{{ route('admin.search') }}">
             <x-nav-link-admin iconType="search">Cari Surat</x-nav-link-admin>
         </a>
-        <form action="{{ route('admin.logout') }}s" method="post" class="border-t-2 border-blue-200 pt-2">
+        <a href="{{ route('admin.history') }}">
+            <x-nav-link-admin iconType="history">History</x-nav-link-admin>
+        </a>
+        <a href="{{ route('admin.profile') }}">
+            <x-nav-link-admin iconType="profile">Profile</x-nav-link-admin>
+        </a>
+        <form action="{{ route('admin.logout') }}" method="post" class="border-t-2 border-blue-200 pt-2">
             @csrf
             <button type="submit" class="w-full text-left">
                 <x-nav-link-admin iconType="logout">Logout</x-nav-link-admin>
@@ -64,6 +70,12 @@
         </a>
         <a href="{{ route('admin.search') }}">
             <x-nav-link-mini-admin iconType="search"></x-nav-link-mini-admin>
+        </a>
+        <a href="{{ route('admin.history') }}">
+            <x-nav-link-mini-admin iconType="history"></x-nav-link-mini-admin>
+        </a>
+        <a href="{{ route('admin.profile') }}">
+            <x-nav-link-mini-admin iconType="profile"></x-nav-link-mini-admin>
         </a>
         <form action="{{ route('admin.logout') }}" method="post" class="border-t-2 border-blue-200 pt-2">
             @csrf

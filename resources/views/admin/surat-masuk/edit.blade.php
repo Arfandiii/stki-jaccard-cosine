@@ -80,22 +80,29 @@
                             @enderror
                         </div>
 
-                        <!-- Kategori Surat -->
+                        <!-- Jenis Surat -->
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-gray-700">Kategori Surat</label>
-                            <select name="kategori_id" required
+                            <div class="flex items-center justify-between">
+                                <label class="block text-sm font-semibold text-gray-700">Jenis Surat</label>
+                                <a href="{{ route('admin.jenis-surat.index') }}"
+                                    class="text-sm text-blue-600 hover:underline flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    <span>Manajement jenis Surat</span>
+                                </a>
+                            </div>
+                            <select name="jenis_surat" required
                                 class="mt-2 w-full rounded-lg border-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-md outline-1 outline-blue-400 transition focus:outline-none px-2 py-1">
-                                <option value="" disabled>Pilih kategori</option>
-                                {{-- @foreach ($kategori as $id => $nama)
-                                    <option value="{{ $id }}"
-                                        {{ old('kategori_id', $surat->kategori_id) == $id ? 'selected' : '' }}>
-                                        {{ $nama }}
+                                <option value="" disabled selected>Pilih jenis</option>
+                                @foreach ($jenisSurat as $j)
+                                    <option value="{{ $j->id }}"
+                                        {{ isset($surat) && $surat->jenis_surat_id == $j->id ? 'selected' : '' }}>
+                                        {{ $j->nama_jenis }}
                                     </option>
-                                @endforeach --}}
+                                @endforeach
                             </select>
-                            @error('kategori_id')
-                                <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <!-- File -->

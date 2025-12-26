@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\SuratKeluar;
+use App\Helpers\PreprocessingText;
+use App\Models\SuratTerm;
+
 
 class SuratKeluarSeeder extends Seeder
 {
@@ -568,7 +570,25 @@ class SuratKeluarSeeder extends Seeder
         ];
 
         foreach ($data as $row) {
-            SuratKeluar::create($row);   // otomatis generate document_terms
+            /* 1. simpan surat_keluar */
+            $surat = SuratKeluar::create($row);
+
+            /* 2. preprocessing perihal (bisa gabung kolom lain) */
+            $rawText = $row['perihal'];               // opsional: .' '.$row['tujuan_surat']
+            $terms   = PreprocessingText::preprocessText($rawText);
+
+            /* 3. masukkan ke surat_terms */
+            $this->insertTerms('keluar', $surat->id, $terms);
+        }
+    }
+
+    private function insertTerms(string $type, int $suratId, array $terms): void
+    {
+        foreach (array_count_values($terms) as $term => $tf) {
+            SuratTerm::updateOrCreate(
+                ['surat_type' => $type, 'surat_id' => $suratId, 'term' => $term],
+                ['tf' => $tf]           // tfidf di-update belakangan
+            );
         }
     }
 }
