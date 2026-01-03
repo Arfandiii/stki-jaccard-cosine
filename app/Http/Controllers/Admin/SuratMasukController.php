@@ -7,6 +7,10 @@ use App\Models\SuratMasuk;
 use App\Http\Controllers\Controller;
 use App\Models\JenisSuratMasuk;
 use Illuminate\Support\Facades\Storage;
+use App\Models\SuratTerm;
+use Illuminate\Support\Facades\DB;
+use App\Helpers\PreprocessingText;
+use App\Helpers\TfidfService;
 
 class SuratMasukController extends Controller
 {
@@ -45,25 +49,47 @@ class SuratMasukController extends Controller
             'file' => 'nullable|file|mimes:pdf,jpg,png,doc,docx|max:2048'
         ]);
 
-        $filePath = null;
+        DB::transaction(function () use ($request) {
 
-        if ($request->hasFile('file')) {
-            // simpan file secara benar
-            $filePath = $request->file('file')->store('surat_masuk', 'public');
-        }
+            // 1. Upload file
+            $filePath = null;
+            if ($request->hasFile('file')) {
+                $filePath = $request->file('file')->store('surat_masuk', 'public');
+            }
 
-        SuratMasuk::create([
-            'nomor_surat' => $request->nomor_surat,
-            'tanggal_surat' => $request->tanggal_surat,
-            'tanggal_terima' => $request->tanggal_terima,
-            'asal_surat' => $request->asal_surat,
-            'perihal' => $request->perihal,
-            'jenis_surat_id' => $request->jenis_surat,
-            'file_path' => $filePath, // masukkan path-nya saja
-        ]);
+            // 2. Simpan surat masuk
+            $surat = SuratMasuk::create([
+                'nomor_surat' => $request->nomor_surat,
+                'tanggal_surat' => $request->tanggal_surat,
+                'tanggal_terima' => $request->tanggal_terima,
+                'asal_surat' => $request->asal_surat,
+                'perihal' => $request->perihal,
+                'jenis_surat_id' => $request->jenis_surat,
+                'file_path' => $filePath,
+            ]);
+
+            // 3. Ambil teks perihal
+            $tokens = PreprocessingText::preprocessText($request->perihal);
+
+            // 4. Hitung TF
+            $tf = array_count_values($tokens);
+
+            // 5. Simpan ke surat_terms
+            foreach ($tf as $term => $count) {
+                SuratTerm::create([
+                    'surat_type' => 'masuk',
+                    'surat_id'   => $surat->id,
+                    'term'       => $term,
+                    'tf'         => $count,
+                    'tfidf'      => 0, // nanti dihitung global
+                ]);
+            }
+            // 6. Hitung TF-IDF global            
+            TfidfService::calculate('masuk');
+        });
 
         return redirect()->route('admin.surat-masuk.index')
-            ->with('success', 'Surat berhasil ditambahkan');
+            ->with('success', 'Surat berhasil ditambahkan & diproses');
     }
 
 
@@ -104,29 +130,59 @@ class SuratMasukController extends Controller
             'file' => 'nullable|file|mimes:pdf,jpg,png,doc,docx|max:2048'
         ]);
 
-        $filePath = $surat->file_path;
+        DB::transaction(function () use ($request, $surat) {
 
-        if ($request->hasFile('file')) {
-
-            if ($surat->file_path && Storage::disk('public')->exists($surat->file_path)) {
-                Storage::disk('public')->delete($surat->file_path);
+            // Upload file (jika ada)
+            $filePath = $surat->file_path;
+            if ($request->hasFile('file')) {
+                if ($surat->file_path && Storage::disk('public')->exists($surat->file_path)) {
+                    Storage::disk('public')->delete($surat->file_path);
+                }
+                $filePath = $request->file('file')->store('surat_masuk', 'public');
             }
 
-            $filePath = $request->file('file')->store('surat_masuk', 'public');
-        }
+            // Cek apakah perihal berubah
+            $perihalChanged = $surat->perihal !== $request->perihal;
 
-        $surat->update([
-            'nomor_surat' => $request->nomor_surat,
-            'tanggal_surat' => $request->tanggal_surat,
-            'tanggal_terima' => $request->tanggal_terima,
-            'asal_surat' => $request->asal_surat,
-            'perihal' => $request->perihal,
-            'jenis_surat_id' => $request->jenis_surat,
-            'file_path' => $filePath
-        ]);
+            // Update surat
+            $surat->update([
+                'nomor_surat' => $request->nomor_surat,
+                'tanggal_surat' => $request->tanggal_surat,
+                'tanggal_terima' => $request->tanggal_terima,
+                'asal_surat' => $request->asal_surat,
+                'perihal' => $request->perihal,
+                'jenis_surat_id' => $request->jenis_surat,
+                'file_path' => $filePath
+            ]);
+
+            // 🔁 Preprocessing ulang HANYA jika perihal berubah
+            if ($perihalChanged) {
+
+                // Hapus term lama
+                SuratTerm::where('surat_type', 'masuk')
+                    ->where('surat_id', $surat->id)
+                    ->delete();
+
+                // Preprocessing
+                $tokens = PreprocessingText::preprocessText($request->perihal);
+                $tf = array_count_values($tokens);
+
+                // Simpan TF baru
+                foreach ($tf as $term => $count) {
+                    SuratTerm::create([
+                        'surat_type' => 'masuk',
+                        'surat_id'   => $surat->id,
+                        'term'       => $term,
+                        'tf'         => $count,
+                        'tfidf'      => 0,
+                    ]);
+                }
+                TfidfService::calculate('masuk');
+            }
+        });
 
         return redirect()->route('admin.surat-masuk.index')
-            ->with('success', 'Surat berhasil diperbarui');
+            ->with('success', 'Surat berhasil diperbarui & diproses ulang');
     }
 
 
@@ -136,8 +192,17 @@ class SuratMasukController extends Controller
     public function destroy(string $id)
     {
         $surat = SuratMasuk::findOrFail($id);
-        Storage::delete($surat->file_path);
+
+        // 🔒 CEK DULU FILE-NYA ADA ATAU TIDAK
+        if ($surat->file_path && Storage::exists($surat->file_path)) {
+            Storage::delete($surat->file_path);
+        }
+
         $surat->delete();
-        return redirect()->route('admin.surat-masuk.index')->with('success', 'Surat berhasil dihapus');
+
+        return redirect()
+            ->route('admin.surat-masuk.index')
+            ->with('success', 'Surat berhasil dihapus');
     }
+
 }

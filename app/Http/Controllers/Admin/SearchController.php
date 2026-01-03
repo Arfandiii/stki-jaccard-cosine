@@ -1,57 +1,146 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Models\{Query, QueryTerm, SuratMasuk, SuratKeluar};
-use App\Services\{PreprocessingService, SimilarityService};
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Helpers\JaccardSimilarity;
+use App\Helpers\CosineSimilarity;
+use App\Models\SuratMasuk;
+use App\Models\SuratKeluar;
 
 class SearchController extends Controller
 {
-    public function search(Request $req)
+    /* =======================
+     * HALAMAN SEARCH
+     * ======================= */
+    public function index()
     {
-        $input = trim($req->q);
-        if (!$input) return back();
+        return view('admin.search.index');
+    }
 
-        // 1. simpan query
-        $query = Query::create(['user_input' => $input]);
-        $tokens = PreprocessingService::tokenize($input);
-        foreach ($tokens as $t => $tf) {
-            QueryTerm::create([
-                'query_id' => $query->id,
-                'term'     => $t,
-                'tf'       => $tf,
-                'tfidf'    => $tf * log(1 + $tf), // sederhana
-            ]);
+    /* =======================
+     * PROSES SEARCH
+     * ======================= */
+    public function search(Request $request)
+    {
+        $request->validate([
+            'query'       => 'required|string|min:2',
+            'letter_type' => 'nullable|in:all,masuk,keluar',
+            'start_date'  => 'nullable|date',
+            'end_date'    => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $query      = $request->input('query');
+        $type       = $request->letter_type ?? 'all';
+        $startDate  = $request->start_date;
+        $endDate    = $request->end_date;
+
+        $startTime = microtime(true);
+
+        $jaccardResults = [];
+        $cosineResults  = [];
+
+        /* =======================
+         * SURAT MASUK
+         * ======================= */
+        if ($type === 'all' || $type === 'masuk') {
+
+            foreach (JaccardSimilarity::calculate($query, 'masuk') as $row) {
+                $doc = SuratMasuk::find($row['surat_id']);
+                if (!$doc) continue;
+
+                $jaccardResults[] = $this->mapResult($doc, $row['similarity'], 'masuk');
+            }
+
+            foreach (CosineSimilarity::calculate($query, 'masuk') as $row) {
+                $doc = SuratMasuk::find($row['surat_id']);
+                if (!$doc) continue;
+
+                $cosineResults[] = $this->mapResult($doc, $row['similarity'], 'masuk');
+            }
         }
 
-        // 2. ambil semua surat
-        $surats = collect();
-        foreach (SuratMasuk::cursor() as $s) {
-            $vec = SimilarityService::vectorFromDB('masuk', $s->id);
-            $surats->push((object)[
-                'type' => 'masuk',
-                'data' => $s,
-                'vec'  => $vec,
-                'jac'  => SimilarityService::jaccard($tokens, $vec),
-                'cos'  => SimilarityService::cosine($tokens, $vec),
-            ]);
-        }
-        foreach (SuratKeluar::cursor() as $s) {
-            $vec = SimilarityService::vectorFromDB('keluar', $s->id);
-            $surats->push((object)[
-                'type' => 'keluar',
-                'data' => $s,
-                'vec'  => $vec,
-                'jac'  => SimilarityService::jaccard($tokens, $vec),
-                'cos'  => SimilarityService::cosine($tokens, $vec),
-            ]);
+        /* =======================
+         * SURAT KELUAR
+         * ======================= */
+        if ($type === 'all' || $type === 'keluar') {
+
+            foreach (JaccardSimilarity::calculate($query, 'keluar') as $row) {
+                $doc = SuratKeluar::find($row['surat_id']);
+                if (!$doc) continue;
+
+                $jaccardResults[] = $this->mapResult($doc, $row['similarity'], 'keluar');
+            }
+
+            foreach (CosineSimilarity::calculate($query, 'keluar') as $row) {
+                $doc = SuratKeluar::find($row['surat_id']);
+                if (!$doc) continue;
+
+                $cosineResults[] = $this->mapResult($doc, $row['similarity'], 'keluar');
+            }
         }
 
-        // 3. urutkan
-        $jacRank = $surats->sortByDesc('jac')->take(10);
-        $cosRank = $surats->sortByDesc('cos')->take(10);
+        /* =======================
+         * FILTER TANGGAL (AMAN)
+         * ======================= */
+        $filterByDate = function ($item) use ($startDate, $endDate) {
+            if (empty($item['date'])) return true;
+            if ($startDate && $item['date'] < $startDate) return false;
+            if ($endDate && $item['date'] > $endDate) return false;
+            return true;
+        };
 
-        return view('search.result', compact('jacRank', 'cosRank', 'input'));
+        $jaccardResults = array_values(array_filter($jaccardResults, $filterByDate));
+        $cosineResults  = array_values(array_filter($cosineResults,  $filterByDate));
+
+        /* =======================
+         * SORTING DESC SCORE
+         * ======================= */
+        usort($jaccardResults, fn($a, $b) => $b['score'] <=> $a['score']);
+        usort($cosineResults,  fn($a, $b) => $b['score'] <=> $a['score']);
+
+        $executionTime = round(microtime(true) - $startTime, 4);
+
+        return response()->json([
+            'query'           => $query,
+            'execution_time'  => $executionTime,
+            'statistics'      => [
+                'total_documents' => SuratMasuk::count() + SuratKeluar::count(),
+                'surat_masuk'     => SuratMasuk::count(),
+                'surat_keluar'    => SuratKeluar::count(),
+            ],
+            'jaccard_results' => $jaccardResults,
+            'cosine_results'  => $cosineResults,
+        ]);
+    }
+
+    /* =======================
+     * FORMAT DATA AGAR SERAGAM
+     * ======================= */
+    private function mapResult($doc, float $score, string $type): array
+    {
+        if ($type === 'masuk') {
+            return [
+                'surat_type'  => 'masuk',
+                'surat_id'    => $doc->id,
+                'score'       => $score,
+                'number'      => $doc->nomor_surat,
+                'date'        => optional($doc->tanggal_surat)->format('Y-m-d'),
+                'title'       => $doc->perihal,
+                'description' => $doc->isi_surat ?? '-',
+            ];
+        }
+
+        // === SURAT KELUAR ===
+        return [
+            'surat_type'  => 'keluar',
+            'surat_id'    => $doc->id,
+            'score'       => $score,
+            'number'      => $doc->nomor_surat ?? '-',
+            'date'        => optional($doc->tanggal_surat)->format('Y-m-d'),
+            'title'       => $doc->perihal,
+            'description' => $doc->keterangan ?? '-',
+        ];
     }
 }

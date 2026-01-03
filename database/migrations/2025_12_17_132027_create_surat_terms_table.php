@@ -13,11 +13,12 @@ return new class extends Migration
             $table->enum('surat_type', ['masuk','keluar']);
             $table->unsignedBigInteger('surat_id');
             $table->string('term');
-            $table->unsignedInteger('tf')->default(1);
-            $table->double('tfidf')->default(0);
+
+            $table->decimal('tf', 8, 4)->default(0);
+            $table->decimal('tfidf', 10, 6)->default(0);
+
             $table->timestamps();
 
-            // index
             $table->unique(['surat_type','surat_id','term']);
             $table->index(['term','surat_type']);
             $table->index(['surat_type','surat_id']);

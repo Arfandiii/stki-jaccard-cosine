@@ -3,11 +3,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\IndexableSurat;
+use Illuminate\Support\Facades\DB;
 
 class SuratMasuk extends Model
 {
-    use HasFactory, IndexableSurat;
+    use HasFactory;
 
     protected $table = 'surat_masuk';
 
@@ -36,5 +36,15 @@ class SuratMasuk extends Model
     {
         return $this->hasMany(SuratTerm::class, 'surat_id')
                     ->where('surat_type', 'masuk');
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($surat) {
+            DB::table('surat_terms')
+                ->where('surat_type', 'masuk')
+                ->where('surat_id', $surat->id)
+                ->delete();
+        });
     }
 }

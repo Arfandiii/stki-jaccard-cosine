@@ -12,8 +12,9 @@ class Query extends Model
 
     protected $fillable = ['query_text'];
 
-    public function queryTerms()
+    public function terms()
     {
         return $this->hasMany(QueryTerm::class);
     }
+
 }

@@ -4,9 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\SuratKeluar;
-use App\Helpers\PreprocessingText;
 use App\Models\SuratTerm;
-
+use App\Helpers\PreprocessingText;
 
 class SuratKeluarSeeder extends Seeder
 {
@@ -568,27 +567,29 @@ class SuratKeluarSeeder extends Seeder
             ['nomor_surat'=>'470/250/Kec.Ponsel/2025','tanggal_surat'=>'2025-10-20','tujuan_surat'=>'Wali Kota Pontianak','perihal'=>'Penyampaian Rencana Kerja Tahun Anggaran Berikutnya','penanggung_jawab'=>'Sekretaris Camat'],
 
         ];
-
+        
+        
         foreach ($data as $row) {
-            /* 1. simpan surat_keluar */
+
+            // 1. Simpan surat keluar
             $surat = SuratKeluar::create($row);
 
-            /* 2. preprocessing perihal (bisa gabung kolom lain) */
-            $rawText = $row['perihal'];               // opsional: .' '.$row['tujuan_surat']
-            $terms   = PreprocessingText::preprocessText($rawText);
+            // 2. Preprocessing PERIHAL SAJA
+            $tokens = PreprocessingText::preprocessText($row['perihal']);
 
-            /* 3. masukkan ke surat_terms */
-            $this->insertTerms('keluar', $surat->id, $terms);
-        }
-    }
+            // 3. Hitung TF
+            $tfCounts = array_count_values($tokens);
 
-    private function insertTerms(string $type, int $suratId, array $terms): void
-    {
-        foreach (array_count_values($terms) as $term => $tf) {
-            SuratTerm::updateOrCreate(
-                ['surat_type' => $type, 'surat_id' => $suratId, 'term' => $term],
-                ['tf' => $tf]           // tfidf di-update belakangan
-            );
+            // 4. Simpan ke surat_terms
+            foreach ($tfCounts as $term => $tf) {
+                SuratTerm::create([
+                    'surat_type' => 'keluar',
+                    'surat_id'   => $surat->id,
+                    'term'       => $term,
+                    'tf'         => (float) $tf, // PENTING
+                    'tfidf'      => 0, // dihitung di tahap TF-IDF
+                ]);
+            }
         }
     }
 }

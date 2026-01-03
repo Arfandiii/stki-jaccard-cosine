@@ -7,7 +7,7 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
 
                     <!-- Header -->
-                    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white">
+                    <div class="bg-linear-to-r from-indigo-500 to-purple-600 p-6 text-white">
                         <h2 class="text-2xl font-bold flex items-center space-x-2">
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -89,7 +89,7 @@
                                 Batal
                             </a>
                             <button type="submit"
-                                class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                                class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition cursor-pointer">
                                 Simpan Perubahan
                             </button>
                         </div>

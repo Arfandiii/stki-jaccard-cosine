@@ -4,10 +4,10 @@
     <div class="content ml-12 transform ease-in-out duration-500 pt-20 px-2 md:px-5 pb-4">
         <div class="flex flex-wrap w-full my-5 -mx-2">
             <div class="w-full px-4">
-                <div class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-xl rounded-lg">
+                <div class="relative flex flex-col min-w-0 wrap-break-words bg-white w-full mb-6 shadow-xl rounded-lg">
                     <div class="rounded-t mb-0 px-4 py-3 border-0">
                         <div class="flex flex-wrap items-center">
-                            <div class="relative w-full px-4 max-w-full flex-grow flex-1">
+                            <div class="relative w-full px-4 max-w-full grow flex-1">
                                 <h3 class="font-semibold text-lg text-blueGray-700">
                                     History
                                 </h3>

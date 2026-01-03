@@ -1,10 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PreprocessingController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\SuratMasukController;
 use App\Http\Controllers\Admin\SuratKeluarController;
 use App\Http\Controllers\Admin\JenisSuratMasukController;
+use App\Http\Controllers\Admin\SearchController;
 use App\Http\Controllers\auth\AuthController;
 
 Route::get('/welcome', function () {
@@ -22,7 +24,10 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/search', [AdminDashboardController::class, 'search'])->name('search');
+        /* ================= SEARCH ================= */
+    Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+    Route::post('/search', [SearchController::class, 'search'])->name('search');
+        /* ======================================== */
     Route::get('/profile', [AdminDashboardController::class, 'profile'])->name('profile');
     Route::get('/profile/edit', [AdminDashboardController::class, 'editProfile'])->name('profile.edit');
     Route::put('/profile', [AdminDashboardController::class, 'updateProfile'])->name('profile.update');

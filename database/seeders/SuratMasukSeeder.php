@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Helpers\PreprocessingText;
 use Illuminate\Database\Seeder;
 use App\Models\SuratMasuk;
 use App\Models\JenisSuratMasuk;
 use App\Models\SuratTerm;
-
+use App\Helpers\PreprocessingText;
+use Illuminate\Support\Facades\DB;
 
 class SuratMasukSeeder extends Seeder
 {
@@ -720,34 +720,43 @@ class SuratMasukSeeder extends Seeder
         ];
 
         foreach ($data as $item) {
-            /* 1. cari id jenis surat */
-            $jenis = JenisSuratMasuk::where('nama_jenis', $item['jenis_surat'])->first();
 
-            /* 2. insert surat_masuk */
+            // 1. jenis surat
+            $jenis = JenisSuratMasuk::firstOrCreate([
+                'nama_jenis' => $item['jenis_surat']
+            ]);
+
+            // 2. simpan surat masuk
             $surat = SuratMasuk::create([
                 'nomor_surat'    => $item['nomor_surat'],
                 'tanggal_surat'  => $item['tanggal_surat'],
                 'tanggal_terima' => $item['tanggal_terima'],
                 'asal_surat'     => $item['asal_surat'],
                 'perihal'        => $item['perihal'],
-                'jenis_surat_id' => $jenis?->id,
-                'file_path'      => null,     // atau path dummy jika ada
+                'jenis_surat_id' => $jenis->id,
+                'file_path'      => null,
             ]);
 
-            /* 3. preprocessing -> surat_terms */
-            $terms = PreprocessingText::preprocessText($item['perihal']);
-            $this->insertTerms('masuk', $surat->id, $terms);
-        }
-    }
+            // 3. preprocessing perihal
+            $tokens = PreprocessingText::preprocessText($item['perihal']);
 
-    /* helper simpan ke surat_terms (TF saat ini) */
-    private function insertTerms(string $type, int $suratId, array $terms): void
-    {
-        foreach (array_count_values($terms) as $term => $tf) {
-            SuratTerm::updateOrCreate(
-                ['surat_type' => $type, 'surat_id' => $suratId, 'term' => $term],
-                ['tf' => $tf]        // tfidf diisi nanti
-            );
+            // 4. hapus term lama
+            SuratTerm::where('surat_type', 'masuk')
+                ->where('surat_id', $surat->id)
+                ->delete();
+
+            // 5. simpan TF
+            $tfList = array_count_values($tokens);
+
+            foreach ($tfList as $term => $tf) {
+                SuratTerm::create([
+                    'surat_type' => 'masuk',
+                    'surat_id'   => $surat->id,
+                    'term'       => $term,
+                    'tf'         => (float) $tf,
+                    'tfidf'      => 0,
+                ]);
+            }
         }
     }
 }

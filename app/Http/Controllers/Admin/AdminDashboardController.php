@@ -108,9 +108,4 @@ class AdminDashboardController extends Controller
     {
         //
     }
-
-    public function search()
-    {
-        return view('admin.search');
-    }
 }
