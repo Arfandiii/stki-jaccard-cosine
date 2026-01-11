@@ -27,6 +27,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         /* ================= SEARCH ================= */
     Route::get('/search', [SearchController::class, 'index'])->name('search.index');
     Route::post('/search', [SearchController::class, 'search'])->name('search');
+    Route::get('/search-simple', [SearchController::class, 'simple'])
+    ->name('search.simple');
         /* ======================================== */
     Route::get('/profile', [AdminDashboardController::class, 'profile'])->name('profile');
     Route::get('/profile/edit', [AdminDashboardController::class, 'editProfile'])->name('profile.edit');
@@ -37,6 +39,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::resource('surat-keluar', SuratKeluarController::class);
     Route::resource('surat-masuk', SuratMasukController::class);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/admin/preprocess-tfidf', [SearchController::class, 'tfidf'])
+    ->name('preprocess.tfidf');
 });
 
 

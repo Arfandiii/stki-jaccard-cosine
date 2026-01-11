@@ -6,7 +6,6 @@ use App\Helpers\PreprocessingText;
 use App\Models\SuratMasuk;
 use App\Models\SuratKeluar;
 use App\Models\SuratTerm;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PreprocessingController extends Controller

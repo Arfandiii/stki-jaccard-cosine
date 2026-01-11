@@ -175,6 +175,13 @@
                 <div id="cosineResults" class="space-y-3">
                     <!-- Hasil akan diisi oleh JavaScript -->
                 </div>
+                <div id="cosinePreprocessPrompt" class="text-center mt-4 hidden">
+                    <p class="text-sm text-gray-600 mb-2">TF-IDF belum dihitung.</p>
+                    <button onclick="preprocessTfidf()"
+                        class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+                        <i class="fas fa-calculator mr-2"></i> Hitung TF-IDF
+                    </button>
+                </div>
                 <div id="cosineLoadMore" class="text-center mt-4 hidden">
                     <button onclick="loadMore('cosine')"
                         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Load More</button>
@@ -282,6 +289,13 @@
                     renderResults('jaccard');
                     renderResults('cosine');
                     updateStatistics(data.statistics, data.execution_time);
+
+                    const cosinePrompt = document.getElementById('cosinePreprocessPrompt');
+                    if (!data.has_tfidf) {
+                        cosinePrompt.classList.remove('hidden');
+                    } else {
+                        cosinePrompt.classList.add('hidden');
+                    }
                 })
                 .catch(err => {
                     console.error(err);
@@ -386,5 +400,34 @@
         document.getElementById('searchInput').addEventListener('keypress', e => {
             if (e.key === 'Enter') performSearch();
         });
+
+        function preprocessTfidf() {
+            if (!confirm('Yakin ingin menghitung TF-IDF? Proses ini mungkin memakan waktu.')) return;
+
+            fetch('{{ route('admin.preprocess.tfidf') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        surat_type: document.getElementById('letterType').value
+                    })
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        alert('TF-IDF berhasil dihitung!');
+                        // reload hasil pencarian
+                        performSearch();
+                    } else {
+                        alert('Gagal: ' + res.message);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Terjadi kesalahan saat preprocessing.');
+                });
+        }
     </script>
 @endsection

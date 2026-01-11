@@ -568,7 +568,6 @@ class SuratKeluarSeeder extends Seeder
 
         ];
         
-        
         foreach ($data as $row) {
 
             // 1. Simpan surat keluar

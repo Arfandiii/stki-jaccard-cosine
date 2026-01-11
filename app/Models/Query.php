@@ -8,13 +8,23 @@ class Query extends Model
 {
     use HasFactory;
 
-    protected $table = 'queries';
+    protected $fillable = [
+        'query_text',
+        'letter_type',
+        'start_date',
+        'end_date',
+        'execution_time',
+        'method',
+    ];
 
-    protected $fillable = ['query_text'];
-
-    public function terms()
+    public function queryTerms()
     {
         return $this->hasMany(QueryTerm::class);
+    }
+
+    public function results()
+    {
+        return $this->hasMany(QueryResult::class);
     }
 
 }

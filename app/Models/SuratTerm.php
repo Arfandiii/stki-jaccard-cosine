@@ -16,6 +16,7 @@ class SuratTerm extends Model
         'term',
         'tf',
         'tfidf',
+        'tfidf_norm',
     ];
 
     public function suratMasuk()
