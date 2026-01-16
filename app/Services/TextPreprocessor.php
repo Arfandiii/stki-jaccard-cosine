@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Helpers;
+namespace App\Services;
 
 use Sastrawi\Stemmer\StemmerFactory;
 use Sastrawi\StopWordRemover\StopWordRemoverFactory;
 
-class PreprocessingText
+class TextPreprocessor
 {
+    
     private static $stopWordRemover;
     private static $stemmer;
 

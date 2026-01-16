@@ -32,7 +32,5 @@ class DatabaseSeeder extends Seeder
             SuratKeluarSeeder::class,
             ]);
         
-        TfidfService::calculate('masuk');
-        TfidfService::calculate('keluar');
     }
 }

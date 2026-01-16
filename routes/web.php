@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PreprocessingController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\DebugController;
 use App\Http\Controllers\Admin\SuratMasukController;
 use App\Http\Controllers\Admin\SuratKeluarController;
 use App\Http\Controllers\Admin\JenisSuratMasukController;
@@ -27,8 +28,9 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         /* ================= SEARCH ================= */
     Route::get('/search', [SearchController::class, 'index'])->name('search.index');
     Route::post('/search', [SearchController::class, 'search'])->name('search');
-    Route::get('/search-simple', [SearchController::class, 'simple'])
-    ->name('search.simple');
+        /* ================= DEBUG ================= */
+    Route::get('/search-debug', [DebugController::class, 'index'])->name('search.debug');
+    Route::get('/search-simple', [DebugController::class, 'search'])->name('search.simple');
         /* ======================================== */
     Route::get('/profile', [AdminDashboardController::class, 'profile'])->name('profile');
     Route::get('/profile/edit', [AdminDashboardController::class, 'editProfile'])->name('profile.edit');

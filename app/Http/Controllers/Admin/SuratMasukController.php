@@ -9,8 +9,8 @@ use App\Models\JenisSuratMasuk;
 use Illuminate\Support\Facades\Storage;
 use App\Models\SuratTerm;
 use Illuminate\Support\Facades\DB;
-use App\Helpers\PreprocessingText;
-use App\Helpers\TfidfService;
+use App\Services\TextPreprocessor;
+use App\Services\TfidfService;
 
 class SuratMasukController extends Controller
 {
@@ -69,24 +69,12 @@ class SuratMasukController extends Controller
             ]);
 
             // 3. Ambil teks perihal
-            $tokens = PreprocessingText::preprocessText($request->perihal);
-
-            // 4. Hitung TF
-            $tf = array_count_values($tokens);
-
-            // 5. Simpan ke surat_terms
-            foreach ($tf as $term => $count) {
-                SuratTerm::create([
-                    'surat_type' => 'masuk',
-                    'surat_id'   => $surat->id,
-                    'term'       => $term,
-                    'tf'         => $count,
-                    'tfidf'      => 0, // nanti dihitung global
-                ]);
-            }
-            // 6. Hitung TF-IDF global            
-            TfidfService::calculate('masuk');
+            $this->saveTerms('masuk', $surat->id, $request->perihal);
+            
         });
+        
+        // 5. TF-IDF GLOBAL (di luar transaksi)
+        TfidfService::recalculateGlobalTFIDF();
 
         return redirect()->route('admin.surat-masuk.index')
             ->with('success', 'Surat berhasil ditambahkan & diproses');
@@ -164,27 +152,31 @@ class SuratMasukController extends Controller
                     ->delete();
 
                 // Preprocessing
-                $tokens = PreprocessingText::preprocessText($request->perihal);
-                $tf = array_count_values($tokens);
+                $this->saveTerms('masuk', $surat->id, $request->perihal);
 
-                // Simpan TF baru
-                foreach ($tf as $term => $count) {
-                    SuratTerm::create([
-                        'surat_type' => 'masuk',
-                        'surat_id'   => $surat->id,
-                        'term'       => $term,
-                        'tf'         => $count,
-                        'tfidf'      => 0,
-                    ]);
-                }
-                TfidfService::calculate('masuk');
             }
+            // Setelah transaksi, TF-IDF GLOBAL (di luar transaksi)
+            TfidfService::recalculateGlobalTFIDF();
         });
 
         return redirect()->route('admin.surat-masuk.index')
             ->with('success', 'Surat berhasil diperbarui & diproses ulang');
     }
 
+    private function saveTerms(string $type, int $suratId, string $text): void
+    {
+        $tokens = TextPreprocessor::preprocessText($text);
+        $tf = array_count_values($tokens);
+
+        foreach ($tf as $term => $count) {
+            SuratTerm::create([
+                'surat_type' => $type,
+                'surat_id'   => $suratId,
+                'term'       => $term,
+                'tf'         => $count,
+            ]);
+        }
+    }
 
     /**
      * Remove the specified resource from storage.

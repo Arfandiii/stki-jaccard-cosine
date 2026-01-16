@@ -215,6 +215,17 @@
             </div>
         </div>
 
+        <!-- Document List Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                Detail Contoh Perhitungan Dokumen
+            </h3>
+            <a href="{{ route('admin.search.debug') }}"
+                class="inline-block px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                <i class="fas fa-bug mr-2"></i>Debug
+            </a>
+        </div>
+
         <!-- Document Detail Modal -->
         <div id="documentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
             <div class="flex items-center justify-center min-h-screen p-4">
@@ -236,7 +247,7 @@
         {{-- </div> --}}
     </div>
 
-    <script>
+    {{-- <script>
         // ========== STATE GLOBAL ==========
         let jaccardFull = [];
         let cosineFull = [];
@@ -429,5 +440,5 @@
                     alert('Terjadi kesalahan saat preprocessing.');
                 });
         }
-    </script>
+    </script> --}}
 @endsection

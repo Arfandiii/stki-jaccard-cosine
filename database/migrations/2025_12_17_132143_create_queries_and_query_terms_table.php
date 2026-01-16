@@ -9,15 +9,15 @@ return new class extends Migration
     public function up()
     {
         Schema::create('queries', function (Blueprint $table) {
-                $table->id();
-                $table->text('query_text');
-                $table->string('letter_type')->nullable();
-                $table->date('start_date')->nullable();
-                $table->date('end_date')->nullable();
-                $table->float('execution_time')->nullable();
-                $table->string('method')->nullable(); // jaccard | cosine | both
-                $table->timestamps();
-            });
+            $table->id();
+            $table->text('query_text');
+            $table->string('letter_type')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->float('execution_time')->nullable();
+            $table->string('method')->nullable(); // jaccard | cosine | both
+            $table->timestamps();
+        });
 
         Schema::create('query_terms', function (Blueprint $table) {
             $table->id();

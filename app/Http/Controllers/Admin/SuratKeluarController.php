@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\SuratTerm;
 use Illuminate\Support\Facades\DB;
-use App\Helpers\PreprocessingText;
-use App\Helpers\TfidfService;
+use App\Services\TextPreprocessor;
+use App\Services\TfidfService;
 use Illuminate\Support\Facades\Storage;
 
 class SuratKeluarController extends Controller
@@ -46,17 +46,12 @@ class SuratKeluarController extends Controller
 
         DB::transaction(function () use ($request) {
 
-            /* =======================
-            * 1. Upload File
-            * ======================= */
-            $filePath = null;
-            if ($request->hasFile('file')) {
-                $filePath = $request->file('file')->store('surat_keluar', 'public');
-            }
+            // 1. Upload file
+            $filePath = $request->hasFile('file')
+                ? $request->file('file')->store('surat_keluar', 'public')
+                : null;
 
-            /* =======================
-            * 2. Simpan Surat Keluar
-            * ======================= */
+            // 2. Simpan surat
             $surat = SuratKeluar::create([
                 'nomor_surat'      => $request->nomor_surat,
                 'tanggal_surat'    => $request->tanggal_surat,
@@ -66,38 +61,17 @@ class SuratKeluarController extends Controller
                 'file_path'        => $filePath,
             ]);
 
-            /* =======================
-            * 3. Preprocessing Perihal
-            * ======================= */
-            $tokens = PreprocessingText::preprocessText($request->perihal);
+            // 3. Preprocessing
+            $this->saveTerms('keluar', $surat->id, $request->perihal);
 
-            /* =======================
-            * 4. Hitung TF
-            * ======================= */
-            $tf = array_count_values($tokens);
-
-            /* =======================
-            * 5. Simpan ke surat_terms
-            * ======================= */
-            foreach ($tf as $term => $count) {
-                SuratTerm::create([
-                    'surat_type' => 'keluar',
-                    'surat_id'   => $surat->id,
-                    'term'       => $term,
-                    'tf'         => $count,
-                    'tfidf'      => 0, // dihitung ulang global
-                ]);
-            }
-
-            /* =======================
-            * 6. Hitung TF-IDF Global
-            * ======================= */
-            TfidfService::calculate('keluar');
         });
+
+        // 5. TF-IDF GLOBAL (di luar transaksi)
+        TfidfService::recalculateGlobalTFIDF();
 
         return redirect()
             ->route('admin.surat-keluar.index')
-            ->with('success', 'Surat keluar berhasil ditambahkan & diproses');
+            ->with('success', 'Surat keluar berhasil ditambahkan');
     }
 
     /**
@@ -159,28 +133,34 @@ class SuratKeluarController extends Controller
 
             // 4. Re-preprocessing & TF-IDF hanya jika perihal berubah
             if ($perihalChanged) {
+
                 SuratTerm::where('surat_type', 'keluar')
-                        ->where('surat_id', $surat->id)
-                        ->delete();
-
-                $tokens = PreprocessingText::preprocessText($request->perihal);
-                $tf = array_count_values($tokens);
-
-                foreach ($tf as $term => $count) {
-                    SuratTerm::create([
-                        'surat_type' => 'keluar',
-                        'surat_id'   => $surat->id,
-                        'term'       => $term,
-                        'tf'         => $count,
-                        'tfidf'      => 0,
-                    ]);
-                }
-                TfidfService::calculate('keluar');
+                    ->where('surat_id', $surat->id)
+                    ->delete();
+                    
+                $this->saveTerms('keluar', $surat->id, $request->perihal);
             }
+            // Setelah transaksi
+            TfidfService::recalculateGlobalTFIDF();
         });
 
         return redirect()->route('admin.surat-keluar.index')
                         ->with('success', 'Surat keluar berhasil diperbarui & diproses ulang');
+    }
+
+    private function saveTerms(string $type, int $suratId, string $text): void
+    {
+        $tokens = TextPreprocessor::preprocessText($text);
+        $tf = array_count_values($tokens);
+
+        foreach ($tf as $term => $count) {
+            SuratTerm::create([
+                'surat_type' => $type,
+                'surat_id'   => $suratId,
+                'term'       => $term,
+                'tf'         => $count,
+            ]);
+        }
     }
 
     /**
@@ -190,15 +170,22 @@ class SuratKeluarController extends Controller
     {
         $surat = SuratKeluar::findOrFail($id);
 
-        // 🔒 CEK DULU FILE-NYA ADA ATAU TIDAK
         if ($surat->file_path && Storage::exists($surat->file_path)) {
             Storage::delete($surat->file_path);
         }
 
+        // Hapus juga terms-nya
+        SuratTerm::where('surat_type', 'keluar')
+            ->where('surat_id', $id)
+            ->delete();
+
         $surat->delete();
+
+        // ➕ Recalculate IDF & TF-IDF global
+        TfidfService::recalculateGlobalTFIDF();
 
         return redirect()
             ->route('admin.surat-keluar.index')
-            ->with('success', 'Surat berhasil dihapus');
+            ->with('success', 'Surat berhasil dihapus & IDF diperbarui');
     }
 }

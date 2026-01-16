@@ -1,30 +1,28 @@
 <?php
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Query extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'query_text',
-        'letter_type',
-        'start_date',
-        'end_date',
-        'execution_time',
-        'method',
+        'query_text','letter_type','start_date','end_date',
+        'execution_time','method'
+    ];
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date'   => 'date',
+        'execution_time' => 'float',
     ];
 
-    public function queryTerms()
+    public function terms(): HasMany
     {
         return $this->hasMany(QueryTerm::class);
     }
-
-    public function results()
+    public function results(): HasMany
     {
         return $this->hasMany(QueryResult::class);
     }
-
 }

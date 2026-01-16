@@ -6,8 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\SuratMasuk;
 use App\Models\JenisSuratMasuk;
 use App\Models\SuratTerm;
-use App\Helpers\PreprocessingText;
-use Illuminate\Support\Facades\DB;
+use App\Services\TextPreprocessor;
 
 class SuratMasukSeeder extends Seeder
 {
@@ -720,13 +719,12 @@ class SuratMasukSeeder extends Seeder
         ];
 
         foreach ($data as $item) {
-
-            // 1. jenis surat
+            /* 0. jenis surat */
             $jenis = JenisSuratMasuk::firstOrCreate([
                 'nama_jenis' => $item['jenis_surat']
-            ]);
+            ]);    
 
-            // 2. simpan surat masuk
+            /* 1. insert surat */
             $surat = SuratMasuk::create([
                 'nomor_surat'    => $item['nomor_surat'],
                 'tanggal_surat'  => $item['tanggal_surat'],
@@ -737,26 +735,67 @@ class SuratMasukSeeder extends Seeder
                 'file_path'      => null,
             ]);
 
-            // 3. preprocessing perihal
-            $tokens = PreprocessingText::preprocessText($item['perihal']);
+            /* 2. preprocessing */
+            $tokens = TextPreprocessor::preprocessText($item['perihal']);
 
-            // 4. hapus term lama
+            /* 3. hapus term lama (kalau update) */
             SuratTerm::where('surat_type', 'masuk')
-                ->where('surat_id', $surat->id)
-                ->delete();
+                    ->where('surat_id', $surat->id)
+                    ->delete();
 
-            // 5. simpan TF
+            /* 4. simpan TF mentah */
             $tfList = array_count_values($tokens);
-
             foreach ($tfList as $term => $tf) {
                 SuratTerm::create([
                     'surat_type' => 'masuk',
                     'surat_id'   => $surat->id,
                     'term'       => $term,
-                    'tf'         => (float) $tf,
-                    'tfidf'      => 0,
+                    'tf'         => (float) $tf,     // hitungan mentah
+                    'tfidf'      => 0,               // kosong dulu
+                    'tfidf_norm' => 0,
                 ]);
             }
         }
     }
 }
+//         foreach ($data as $item) {
+
+//             // 1. jenis surat
+//             $jenis = JenisSuratMasuk::firstOrCreate([
+//                 'nama_jenis' => $item['jenis_surat']
+//             ]);
+
+//             // 2. simpan surat masuk
+//             $surat = SuratMasuk::create([
+//                 'nomor_surat'    => $item['nomor_surat'],
+//                 'tanggal_surat'  => $item['tanggal_surat'],
+//                 'tanggal_terima' => $item['tanggal_terima'],
+//                 'asal_surat'     => $item['asal_surat'],
+//                 'perihal'        => $item['perihal'],
+//                 'jenis_surat_id' => $jenis->id,
+//                 'file_path'      => null,
+//             ]);
+
+//             // 3. preprocessing perihal
+//             $tokens = PreprocessingText::preprocessText($item['perihal']);
+
+//             // 4. hapus term lama
+//             SuratTerm::where('surat_type', 'masuk')
+//                 ->where('surat_id', $surat->id)
+//                 ->delete();
+
+//             // 5. simpan TF
+//             $tfList = array_count_values($tokens);
+
+//             foreach ($tfList as $term => $tf) {
+//                 SuratTerm::create([
+//                     'surat_type' => 'masuk',
+//                     'surat_id'   => $surat->id,
+//                     'term'       => $term,
+//                     'tf'         => (float) $tf,
+//                     'tfidf'      => 0,
+//                 ]);
+//             }
+//         }
+//     }
+// }

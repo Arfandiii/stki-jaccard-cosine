@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\SuratKeluar;
 use App\Models\SuratTerm;
-use App\Helpers\PreprocessingText;
+use App\Services\TextPreprocessor;
 
 class SuratKeluarSeeder extends Seeder
 {
@@ -569,26 +569,54 @@ class SuratKeluarSeeder extends Seeder
         ];
         
         foreach ($data as $row) {
-
-            // 1. Simpan surat keluar
+            /* 1. insert surat keluar */
             $surat = SuratKeluar::create($row);
 
-            // 2. Preprocessing PERIHAL SAJA
-            $tokens = PreprocessingText::preprocessText($row['perihal']);
+            /* 2. preprocessing perihal */
+            $tokens = TextPreprocessor::preprocessText($row['perihal']);
 
-            // 3. Hitung TF
-            $tfCounts = array_count_values($tokens);
+            /* 3. bersihkan term lama (kalau update) */
+            SuratTerm::where('surat_type', 'keluar')
+                    ->where('surat_id', $surat->id)
+                    ->delete();
 
-            // 4. Simpan ke surat_terms
-            foreach ($tfCounts as $term => $tf) {
+            /* 4. simpan TF mentah */
+            $tfList = array_count_values($tokens);
+            foreach ($tfList as $term => $tf) {
                 SuratTerm::create([
                     'surat_type' => 'keluar',
                     'surat_id'   => $surat->id,
                     'term'       => $term,
-                    'tf'         => (float) $tf, // PENTING
-                    'tfidf'      => 0, // dihitung di tahap TF-IDF
+                    'tf'         => (float) $tf, // hitungan mentah
+                    'tfidf'      => 0,           // kosong dulu
+                    'tfidf_norm' => 0,
                 ]);
             }
         }
     }
 }
+
+//         foreach ($data as $row) {
+
+//             // 1. Simpan surat keluar
+//             $surat = SuratKeluar::create($row);
+
+//             // 2. Preprocessing PERIHAL SAJA
+//             $tokens = PreprocessingText::preprocessText($row['perihal']);
+
+//             // 3. Hitung TF
+//             $tfCounts = array_count_values($tokens);
+
+//             // 4. Simpan ke surat_terms
+//             foreach ($tfCounts as $term => $tf) {
+//                 SuratTerm::create([
+//                     'surat_type' => 'keluar',
+//                     'surat_id'   => $surat->id,
+//                     'term'       => $term,
+//                     'tf'         => (float) $tf, // PENTING
+//                     'tfidf'      => 0, // dihitung di tahap TF-IDF
+//                 ]);
+//             }
+//         }
+//     }
+// }

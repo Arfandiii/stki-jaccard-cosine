@@ -16,6 +16,7 @@ class QueryTerm extends Model
         'tf',
         'tfidf',
         'tfidf_norm',
+        'idf',
     ];
 
     public function queryModel()
