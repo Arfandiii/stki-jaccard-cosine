@@ -162,8 +162,9 @@
                         <span class="gradient-text">Pencarian Arsip Surat</span>
                     </h1>
 
-                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
-                        Temukan arsip surat dengan mudah menggunakan algoritma Jaccard Similarity dan Cosine Similarity.
+                    <p class="text-l text-gray-600 mb-8 leading-relaxed">
+                        Sistem Pencarian Arsip Surat menggunakan Perbandingan Metode Jaccard Similarity dan Cosine
+                        Similarity.
                         Sistem kami memberikan hasil pencarian yang akurat dan relevan untuk arsip surat masuk dan
                         keluar.
                     </p>
@@ -189,7 +190,7 @@
                         </div>
                         <div class="relative bg-white rounded-3xl shadow-2xl p-8">
                             <div class="flex items-center justify-between mb-6">
-                                <h3 class="text-xl font-bold text-gray-800">Demo Pencarian</h3>
+                                <h3 class="text-xl font-bold text-gray-800">Fitur Utama</h3>
                                 <div class="flex space-x-2">
                                     <span class="w-3 h-3 bg-red-400 rounded-full"></span>
                                     <span class="w-3 h-3 bg-yellow-400 rounded-full"></span>
@@ -200,17 +201,17 @@
                             <div class="space-y-4">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-2 h-2 bg-green-400 rounded-full pulse-slow"></div>
-                                    <span class="text-sm text-gray-600">Algoritma Jaccard Similarity</span>
+                                    <span class="text-sm text-gray-600">Pengelolaan Arsip Digital</span>
                                 </div>
                                 <div class="flex items-center space-x-3">
                                     <div class="w-2 h-2 bg-blue-400 rounded-full pulse-slow"
                                         style="animation-delay: 1s;"></div>
-                                    <span class="text-sm text-gray-600">Algoritma Cosine Similarity</span>
+                                    <span class="text-sm text-gray-600">Pencarian Arsip Surat</span>
                                 </div>
                                 <div class="flex items-center space-x-3">
                                     <div class="w-2 h-2 bg-purple-400 rounded-full pulse-slow"
                                         style="animation-delay: 2s;"></div>
-                                    <span class="text-sm text-gray-600">Pencarian Real-time</span>
+                                    <span class="text-sm text-gray-600">Perbandingan Metode</span>
                                 </div>
                             </div>
 
@@ -236,69 +237,71 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    Fitur Unggulan Kami
+                    Fitur Unggulan
                 </h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                <p class="text-l text-gray-600 max-w-3xl mx-auto">
                     Teknologi canggih untuk memudahkan pengelolaan dan pencarian arsip surat dengan metode Jaccard
                     Similarity dan Cosine Similarity
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Jaccard Similarity -->
+                <!-- Pengelolaan Arsip Digital -->
                 <div class="algorithm-card p-8 rounded-2xl hover-card">
                     <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-6">
                         <i class="fas fa-percentage text-green-600 text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Jaccard Similarity</h3>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Pengelolaan Arsip Digital</h3>
                     <p class="text-gray-600 mb-6">
-                        Mengukur kemiripan berdasarkan irisan kata kunci antara dokumen query dan dokumen target.
+                        Pengelolaan Arsip Digital Surat Masuk dan Surat Keluar.
                     </p>
                     <ul class="space-y-2 text-sm text-gray-600">
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Cocok untuk
-                            pencarian sederhana</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Perhitungan
-                            cepat</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Input Metadata
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Manajemen Data
+                        </li>
                         <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Akurasi tinggi
                             untuk kata kunci spesifik</li>
                     </ul>
                 </div>
 
-                <!-- Cosine Similarity -->
+                <!--Fitur Pencarian-->
                 <div class="algorithm-card p-8 rounded-2xl hover-card">
                     <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
                         <i class="fas fa-calculator text-blue-600 text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Cosine Similarity</h3>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Pencarian Arsip Surat</h3>
                     <p class="text-gray-600 mb-6">
-                        Menggunakan vektor TF-IDF untuk menghitung kemiripan berdasarkan bobot kata.
+                        Hasil pencarian akan muncul dalam bentuk perbandingan dua metode.
                     </p>
                     <ul class="space-y-2 text-sm text-gray-600">
-                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Lebih presisi
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Form Pencarian
+                            Teks
                         </li>
-                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Mempertimbangkan
-                            bobot kata</li>
-                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Cocok untuk
-                            dokumen panjang</li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Tampilan Hasil
+                            Relevan</li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Filter dan
+                            Penyortiran</li>
                     </ul>
                 </div>
 
-                <!-- Real-time Search -->
+                <!--Perbandingan Metode -->
                 <div class="algorithm-card p-8 rounded-2xl hover-card">
                     <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6">
                         <i class="fas fa-bolt text-purple-600 text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Pencarian Real-time</h3>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Perbandingan Metode</h3>
                     <p class="text-gray-600 mb-6">
-                        Hasil pencarian langsung muncul saat Anda mengetik dengan performa optimal.
-                    </p>
+                        Menggunakan Metode Jaccard Similarity dan Cosine Similarity.
                     <ul class="space-y-2 text-sm text-gray-600">
-                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Respons cepat
+                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Hasil Akurasi
+                            Pencarian
                         </li>
-                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Auto-suggestion
+                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Waktu Pencarian
                         </li>
-                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Filtering
-                            lanjutan</li>
+                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Jumlah Dokumen
+                            Terindeks
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -312,15 +315,17 @@
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                     Tentang Sistem Kami
                 </h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Solusi modern untuk pengelolaan arsip surat dengan teknologi pencarian canggih
+                <p class="text-l text-gray-600 max-w-3xl mx-auto">
+                    Sistem ini bertujuan untuk mempermudah dan mempercepat proses temu kembali arsip surat secara
+                    efektif dan efisien. Perbandingan Metode Jaccard Similarity dan Cosine Similarity bertujuan untuk
+                    mengetahui metode mana yang lebih optimal untuk jenis data arsip surat tertentu.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"
-                        alt="Digital Archive System" class="rounded-2xl shadow-xl">
+                    <img src="https://www.researchgate.net/publication/337654096/figure/fig9/AS:830997729902593@1575136706489/Comparison-between-cosine-similarity-and-Jaccard-similarity.png"
+                        alt="Digital Archive System" class="rounded-2x1 shadow-xl">
                 </div>
 
                 <div class="space-y-6">
@@ -329,9 +334,9 @@
                             <i class="fas fa-rocket text-blue-600"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Performa Cepat</h3>
-                            <p class="text-gray-600">Pencarian dilakukan dalam hitungan milidetik dengan algoritma yang
-                                dioptimalkan.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Metode Jaccard Similarity</h3>
+                            <p class="text-gray-600">Mengukur Kemiripan berdasarkan irisan kata kunci antara dokumen
+                                query dan dokumen target.</p>
                         </div>
                     </div>
 
@@ -340,8 +345,9 @@
                             <i class="fas fa-shield-alt text-green-600"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Keamanan Terjamin</h3>
-                            <p class="text-gray-600">Data arsip tersimpan dengan aman menggunakan enkripsi terbaru.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Metode Cosine Similarity</h3>
+                            <p class="text-gray-600">Menggunakan Vektor TF-IDF untuk menghitung kemiripan berdasarkan
+                                bobot kata.</p>
                         </div>
                     </div>
 
@@ -350,8 +356,10 @@
                             <i class="fas fa-chart-line text-purple-600"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Analisis Mendalam</h3>
-                            <p class="text-gray-600">Dapatkan insight dari pola pencarian dan penggunaan arsip.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Pencarian Cepat dan Pengelolaan Arsip
+                                Digital</h3>
+                            <p class="text-gray-600">Pencarian dilakukan dengan algoritma yang dioptimalkan dan
+                                mengelola data arsip surat dengan efektif dan efisien.</p>
                         </div>
                     </div>
                 </div>
@@ -376,9 +384,9 @@
                 <div>
                     <h4 class="font-semibold mb-4">Fitur</h4>
                     <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="#" class="hover:text-white transition">Algoritma Jaccard</a></li>
-                        <li><a href="#" class="hover:text-white transition">Algoritma Cosine</a></li>
-                        <li><a href="#" class="hover:text-white transition">Statistik Laporan</a></li>
+                        <li><a href="#" class="hover:text-white transition">Pengelolaan Arsip Digital</a></li>
+                        <li><a href="#" class="hover:text-white transition">Pencarian Arsip Surat</a></li>
+                        <li><a href="#" class="hover:text-white transition">Perbandingan Metode</a></li>
                     </ul>
                 </div>
                 <div>
