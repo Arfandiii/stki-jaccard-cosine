@@ -60,28 +60,28 @@
                                             No</th>
                                         <th
                                             class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Query Text</th>
+                                            Teks Query</th>
                                         <th
                                             class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Letter Type</th>
+                                            Jenis Surat</th>
                                         <th
                                             class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Start Date</th>
+                                            Tanggal Mulai</th>
                                         <th
                                             class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            End Date</th>
+                                            Tanggal Berakhir</th>
                                         <th
                                             class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Execution Time</th>
+                                            Waktu Eksekusi</th>
                                         <th
                                             class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Results Count</th>
+                                            Jumlah Hasil</th>
                                         <th
                                             class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Avg Cosine Score</th>
+                                            Skor Cosine Rata-rata</th>
                                         <th
                                             class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Avg Jaccard Score</th>
+                                            Skor Jaccard Rata-rata</th>
                                         <th
                                             class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Aksi</th>
