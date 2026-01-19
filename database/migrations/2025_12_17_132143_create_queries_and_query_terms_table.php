@@ -15,7 +15,9 @@ return new class extends Migration
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->float('execution_time')->nullable();
-            $table->string('method')->nullable(); // jaccard | cosine | both
+            $table->integer('results_count')->nullable();
+            $table->decimal('avg_cosine_score', 5, 4)->nullable();
+            $table->decimal('avg_jaccard_score', 5, 4)->nullable();
             $table->timestamps();
         });
 
@@ -24,9 +26,9 @@ return new class extends Migration
             $table->unsignedBigInteger('query_id');
             $table->string('term');
             $table->unsignedInteger('tf')->default(1);
+            $table->double('idf')->default(0);
             $table->double('tfidf')->default(0);
             $table->double('tfidf_norm')->default(0);
-            $table->double('idf')->default(0); // opsional, bantu debug
             $table->timestamps();
 
             $table->foreign('query_id')->references('id')->on('queries')->onDelete('cascade');

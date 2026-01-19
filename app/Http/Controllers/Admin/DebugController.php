@@ -11,9 +11,11 @@ use Illuminate\Http\Request;
 use App\Services\Similarity\CosineSimilarity;
 use App\Services\Similarity\JaccardSimilarity;
 use App\Services\TfidfService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon;
+use App\Models\SuratTerm;
+use App\Services\ConfusionMatrix;
+use Illuminate\Support\Facades\Log;
+
+use function Symfony\Component\String\s;
 
 class DebugController extends Controller
 {
@@ -90,25 +92,71 @@ class DebugController extends Controller
         $tfidfNormTable = $tfidfNorm['normalized'];
 
         /* ================= 5. COSINE SEMUA DOKUMEN ================= */
-        $cosineSimilarities = CosineSimilarity::calculateCosineSimilarity($tfidfNormTable, count($documents));
+        $cosineSimilaritiesRaw = CosineSimilarity::calculateCosineSimilarity($tfidfNormTable, count($documents));
 
-        /* ================= 6. FILTER HASIL (Bukan hitung ulang!) ================= */
-        if ($filter !== 'all') {
-            $cosineSimilarities = array_filter($cosineSimilarities, function ($row) use ($documents, $filter) {
-                $docIndex = intval(substr($row['doc'], 1)) - 1;
-                return ($documents[$docIndex]['tipe'] ?? null) === $filter;
-            });
+        // Konversi format untuk ConfusionMatrix
+        $cosineResultsForConfusion = [];
+        foreach ($cosineSimilaritiesRaw as $item) {
+            $docIndex = intval(substr($item['doc'], 1)) - 1;
+            if (isset($documents[$docIndex])) {
+                $doc = $documents[$docIndex];
+                $cosineResultsForConfusion[] = [
+                    'id' => $doc['id'],
+                    'cosine' => $item['similarity'],
+                    'tipe' => $doc['tipe'],
+                    'isi' => $doc['isi'],
+                    'tokens' => $doc['tokens'] ?? []
+                ];
+            }
         }
 
         /* ================= 7. JACCARD (GLOBAL) ================= */
         $querySet = array_unique($queryTokens);
-        $jaccardSimilarities = JaccardSimilarity::calculateJaccardSimilarity($documents, $querySet);
+        $jaccardSimilaritiesRaw = JaccardSimilarity::calculateJaccardSimilarity($documents, $querySet);
 
-        if ($filter !== 'all') {
-            $jaccardSimilarities = array_filter($jaccardSimilarities, fn($j) => $j['tipe'] === $filter);
+        // Konversi format untuk ConfusionMatrix
+        $jaccardResultsForConfusion = [];
+        foreach ($jaccardSimilaritiesRaw as $item) {
+            $docIndex = intval(substr($item['doc'], 1)) - 1;
+            if (isset($documents[$docIndex])) {
+                $doc = $documents[$docIndex];
+                $jaccardResultsForConfusion[] = [
+                    'id' => $doc['id'],
+                    'jaccard' => $item['jaccard'],
+                    'tipe' => $doc['tipe'],
+                    'isi' => $doc['isi'],
+                    'tokens' => $doc['tokens'] ?? []
+                ];
+            }
         }
 
-        /* ================= 8. DEBUG PREPROCESS ================= */
+        /* ================= 6. FILTER HASIL (untuk display) ================= */
+        if ($filter !== 'all') {
+            $cosineSimilarities = array_filter($cosineSimilaritiesRaw, function ($row) use ($documents, $filter) {
+                $docIndex = intval(substr($row['doc'], 1)) - 1;
+                return ($documents[$docIndex]['tipe'] ?? null) === $filter;
+            });
+            
+            $jaccardSimilarities = array_filter($jaccardSimilaritiesRaw, fn($j) => $j['tipe'] === $filter);
+        } else {
+            $cosineSimilarities = $cosineSimilaritiesRaw;
+            $jaccardSimilarities = $jaccardSimilaritiesRaw;
+        }
+
+        /* ================= CONFUSION MATRIX ================= */
+        $confusionMatrix = ConfusionMatrix::calculateForSearch(
+            $cosineResultsForConfusion, 
+            $jaccardResultsForConfusion, 
+            $documents, 
+            $query,
+            0.1, // prediction threshold
+            0.1  // ground truth threshold
+        );
+
+        /* ================= COMPARISON METRICS ================= */
+        $comparisonMetrics = ConfusionMatrix::generateReport($confusionMatrix);
+
+        /* ================= 10. DEBUG PREPROCESS ================= */
         $documentsdetailed = $this->preprocessSuratDocumentsDetailed($query);
 
         return view('admin.search.debug', compact(
@@ -124,6 +172,9 @@ class DebugController extends Controller
             'cosineSimilarities',
             'jaccardSimilarities',
             'documentsdetailed',
+            'confusionMatrix',   
+            'comparisonMetrics',
+            
         ));
     }
 
@@ -143,67 +194,5 @@ class DebugController extends Controller
             'preprocessing' => TextPreprocessor::preprocessTextDetailed($query),
         ];
         return $docs;
-    }
-
-
-    public static function preprocessQuery(string $query,
-    ?string $letterType = null,
-    ?string $startDate = null,
-    ?string $endDate = null,
-    string $method = 'both')
-    {
-        $start = microtime(true);   
-
-        // 1. Simpan query ke dalam tabel queries
-        $queryModel = Query::create([
-            'query_text'  => $query,
-            'letter_type' => $letterType,
-            'start_date'  => $startDate,
-            'end_date'    => $endDate,
-            'method'      => $method,
-        ]);
-
-        // 2. Preprocess query
-        $tokens   = TextPreprocessor::preprocessText($query);
-        $queryTF  = array_count_values($tokens);
-        $terms    = array_keys($queryTF);
-
-        // 3. Hitung IDF (cached)
-        $totalDocs = SuratMasuk::count() + SuratKeluar::count();
-        $key       = 'idf_map:' . md5(implode('|', $terms));
-        $idfMap    = Cache::remember($key, Carbon::now()->addMinutes(10), function () use ($terms, $totalDocs) {
-            return DB::table('surat_terms')
-                ->select('term', DB::raw('COUNT(DISTINCT surat_id) as docs'))
-                ->whereIn('term', $terms)
-                ->groupBy('term')
-                ->pluck('docs', 'term')
-                ->map(fn($df) => $df > 0 ? round(log10($totalDocs / $df), 4) : 0)
-                ->toArray();
-        });
-
-        // 4. Hitung TF-IDF & simpan ke query_terms
-        $queryTFIDF = [];
-        DB::transaction(function () use ($queryModel, $queryTF, $idfMap, &$queryTFIDF) {
-            foreach ($queryTF as $term => $count) {
-                $tfWeight       = $count > 0 ? round(1 + log10($count), 4) : 0;
-                $idf            = $idfMap[$term] ?? 0;
-                $tfidf          = round($tfWeight * $idf, 4);
-                $queryTFIDF[$term] = $tfidf;
-
-                QueryTerm::updateOrCreate(
-                    ['query_id' => $queryModel->id, 'term' => $term],
-                    ['tf' => $count, 'tfidf' => $tfidf]
-                );
-            }
-        });
-
-        // 5. Hitung & update execution_time (dalam ms)
-        $timeMs = round((microtime(true) - $start) * 1000, 2);
-        $queryModel->update(['execution_time' => $timeMs]);
-
-        return [
-            'queryModel' => $queryModel,
-            'queryTFIDF' => $queryTFIDF,
-        ];
     }
 }

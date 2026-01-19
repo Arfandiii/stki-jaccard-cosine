@@ -3,37 +3,492 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Query;
+use App\Models\QueryTerm;
+use App\Models\SuratKeluar;
+use App\Models\SuratMasuk;
+use App\Services\ConfusionMatrix;
+use App\Services\Similarity\CosineSimilarity;
+use App\Services\Similarity\JaccardSimilarity;
+use App\Services\TextPreprocessor;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SearchController extends Controller
 {
     /* ---------- HALAMAN UTAMA ---------- */
-        public function index()
+    public function index()
     {
-        return view('admin.search.index1');
+        return view('admin.search.index');
     }
 
     public function search(Request $request)
     {
-        $query      = $request->input('query');
-        $letterType = $request->input('letterType');
-        $startDate  = $request->input('startDate');
-        $endDate    = $request->input('endDate');
-        $method     = $request->input('method', 'both'); // tambahkan select di form jika perlu
+        $startTime = microtime(true);
+        
+        // CEK APAKAH INI SUBMIT FORM ATAU FIRST LOAD/PAGINATION
+        $isFormSubmit = $request->has('query_text') || $request->has('letterType') || 
+                        $request->has('startDate') || $request->has('endDate');
 
+        // Ambil dan validasi query
+        $query = trim($request->input('query_text', ''));
+        
+        // JIKA INI SUBMIT FORM DAN QUERY KOSONG
+        if ($isFormSubmit && empty($query)) {
+            return redirect()->route('admin.search.index')
+                ->with('error', 'Kata kunci pencarian tidak boleh kosong')
+                ->withInput($request->except('query_text'));
+        }
+        
+        // JIKA QUERY VALID, CLEAR ERROR LAMA
+        if (!empty($query)) {
+            session()->forget('error');
+        }
+        
+        // JIKA INI PAGINATION ATAU FIRST LOAD TANPA QUERY
+        if (!$isFormSubmit && empty($query)) {
+            // Tampilkan halaman kosong tanpa error
+            return view('admin.search.index', [
+                'query' => '',
+                'letterType' => 'all',
+                'startDate' => '',
+                'endDate' => '',
+                'cosineResults' => [],
+                'jaccardResults' => [],
+                'cosinePaginator' => null,
+                'jaccardPaginator' => null,
+                'cosineTotal' => 0,
+                'jaccardTotal' => 0,
+                'searchTime' => 0,
+                'totalSuratUnik' => 0,
+                'suratMasukUnik' => 0,
+                'suratKeluarUnik' => 0,
+                'totalJaccard' => 0,
+                'totalCosine' => 0,
+                'jaccardMasuk' => 0,
+                'jaccardKeluar' => 0,
+                'cosineMasuk' => 0,
+                'cosineKeluar' => 0,
+                'avgCosine' => 0,
+                'avgJaccard' => 0,
+                'confusionMatrix' => null,
+                'comparisonMetrics' => null
+            ]);
+        }
+        
+        // Simpan parameter pencarian di session
+        $request->session()->put('search_params', [
+            'query_text' => $query,
+            'letterType' => $request->input('letterType'),
+            'startDate'  => $request->input('startDate'),
+            'endDate'    => $request->input('endDate')
+        ]);
+        
+        // Ambil parameter dari session jika ada (untuk pagination)
+        $sessionParams = $request->session()->get('search_params', []);
+        
+        $query      = $request->input('query_text', $sessionParams['query_text'] ?? '');
+        $letterType = $request->input('letterType', $sessionParams['letterType'] ?? 'all');
+        $startDate  = $request->input('startDate', $sessionParams['startDate'] ?? '');
+        $endDate    = $request->input('endDate', $sessionParams['endDate'] ?? '');
 
-        $preprocessor = DebugController::preprocessQuery(
-            $query,
-            $letterType,
-            $startDate,
-            $endDate,
-            $method
+        // 1. Preprocess query - TANPA execution time dulu
+        $queryData  = $this->preprosesQuery($query, $letterType, $startDate, $endDate);
+        $queryTfidfNorm = $queryData['tfidfNorm'];
+        $queryTerms = $queryData['terms'];
+
+        // 2. Get ALL results from both algorithms
+        $allCosineResults = CosineSimilarity::getCosineResults($queryTfidfNorm, $letterType, $startDate, $endDate);
+        $allJaccardResults = JaccardSimilarity::getJaccardResults($queryTerms, $letterType, $startDate, $endDate);
+        
+        /* ================= CONFUSION MATRIX (hanya jika ada hasil) ================= */
+        $confusionMatrix = null;
+        $comparisonMetrics = null;
+        
+        if (!empty($allCosineResults) || !empty($allJaccardResults)) {
+            // Ambil semua dokumen yang memenuhi filter untuk ground truth
+            $allDocuments = $this->getAllFilteredDocuments($letterType, $startDate, $endDate);
+            
+            // Gunakan service ConfusionMatrix
+            $confusionMatrix = ConfusionMatrix::calculateForSearch(
+                $allCosineResults, 
+                $allJaccardResults, 
+                $allDocuments, 
+                $query
+            );
+            
+            // Generate report untuk ditampilkan
+            $comparisonMetrics = ConfusionMatrix::generateReport($confusionMatrix);
+        }
+        
+        // 3. Pagination settings - GUNAKAN PARAMETER BERBEDA
+        $perPage = 3;
+        $cosinePage = $request->input('cosine_page', 1);  // Parameter khusus Cosine
+        $jaccardPage = $request->input('jaccard_page', 1); // Parameter khusus Jaccard
+        
+        // 4. Paginate Cosine Results
+        $cosineCollection = collect($allCosineResults);
+        $cosinePaginated = $cosineCollection->forPage($cosinePage, $perPage)->values();
+        $cosineResults = $cosinePaginated->all();
+        $cosineTotal = $cosineCollection->count();
+        
+        // 5. Paginate Jaccard Results  
+        $jaccardCollection = collect($allJaccardResults);
+        $jaccardPaginated = $jaccardCollection->forPage($jaccardPage, $perPage)->values();
+        $jaccardResults = $jaccardPaginated->all();
+        $jaccardTotal = $jaccardCollection->count();
+        
+        // 6. Calculate statistics
+        $searchTime = round(microtime(true) - $startTime, 3);
+        
+        // Gabungkan semua hasil dan ambil ID surat unik
+        $allResults = array_merge($allCosineResults, $allJaccardResults);
+        $resultsCount = count(array_unique(array_column($allResults, 'id')));
+        
+        // Ambil ID surat unik (tanpa duplikat)
+        $uniqueIds = collect($allResults)->pluck('id')->unique();
+        $totalSuratUnik = $uniqueIds->count();
+        
+        // Ambil surat unik untuk menghitung tipe
+        $uniqueResults = collect($allResults)->unique('id');
+        
+        // Hitung jumlah surat masuk dan keluar dari surat unik
+        $suratMasukUnik = $uniqueResults->where('tipe', 'masuk')->count();
+        $suratKeluarUnik = $uniqueResults->where('tipe', 'keluar')->count();
+        
+        // Hitung distribusi per algoritma
+        $jaccardMasuk = collect($allJaccardResults)->where('tipe', 'masuk')->count();
+        $jaccardKeluar = collect($allJaccardResults)->where('tipe', 'keluar')->count();
+        $cosineMasuk = collect($allCosineResults)->where('tipe', 'masuk')->count();
+        $cosineKeluar = collect($allCosineResults)->where('tipe', 'keluar')->count();
+        
+        // Jumlah hasil per algoritma
+        $totalJaccard = $jaccardTotal;
+        $totalCosine = $cosineTotal;
+        
+        // Average scores
+        $avgCosine = $cosineTotal > 0 
+            ? collect($allCosineResults)->avg('cosine') 
+            : 0;
+        
+        $avgJaccard = $jaccardTotal > 0 
+            ? collect($allJaccardResults)->avg('jaccard') 
+            : 0;
+
+        // 7. UPDATE query di database dengan execution time dan results
+        if ($queryData['queryModel']) {
+            try {
+                // Cek apakah ini query baru (belum ada execution time)
+                // atau query existing dari pagination
+                if ($queryData['queryModel']->execution_time == 0) {
+                    // Ini query baru, update dengan hasil pencarian
+                    $queryData['queryModel']->update([
+                        'execution_time' => $searchTime,
+                        'results_count' => $resultsCount,
+                        'avg_cosine_score' => $avgCosine,
+                        'avg_jaccard_score' => $avgJaccard
+                    ]);
+                }
+                // Jika sudah ada execution time (dari pagination sebelumnya), 
+                // tidak perlu update lagi
+            } catch (\Exception $e) {
+                Log::warning('Gagal update query stats: ' . $e->getMessage());
+            }
+        }
+
+        // 8. Create paginator instances for view dengan PARAMETER YANG BERBEDA
+        $queryParams = [
+            'query_text' => $query,
+            'letterType' => $letterType,
+            'startDate'  => $startDate,
+            'endDate'    => $endDate
+        ];
+        
+        // Paginator untuk Cosine dengan parameter cosine_page
+        $cosinePaginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $cosineResults,
+            $cosineTotal,
+            $perPage,
+            $cosinePage,
+            [
+                'path' => $request->url(),
+                'pageName' => 'cosine_page', // Nama parameter khusus
+                'query' => array_merge($queryParams, $request->except('cosine_page'))
+            ]
         );
         
-        dd($preprocessor);
+        // Paginator untuk Jaccard dengan parameter jaccard_page
+        $jaccardPaginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $jaccardResults,
+            $jaccardTotal,
+            $perPage,
+            $jaccardPage,
+            [
+                'path' => $request->url(),
+                'pageName' => 'jaccard_page', // Nama parameter khusus
+                'query' => array_merge($queryParams, $request->except('jaccard_page'))
+            ]
+        );
 
-        return view('admin.search.index1');
+        return view('admin.search.index', compact(
+            'query',
+            'letterType',
+            'startDate',
+            'endDate',
+            // Results dengan pagination
+            'cosineResults',
+            'jaccardResults',
+            // Paginators
+            'cosinePaginator',
+            'jaccardPaginator',
+            // Totals
+            'cosineTotal',
+            'jaccardTotal',
+            'searchTime',
+            // STATISTIK SURAT UNIK
+            'totalSuratUnik',
+            'suratMasukUnik',
+            'suratKeluarUnik',
+            // INFORMASI ALGORITMA
+            'totalJaccard',
+            'totalCosine',
+            'jaccardMasuk',
+            'jaccardKeluar',
+            'cosineMasuk',
+            'cosineKeluar',
+            // SKOR RATA-RATA
+            'avgCosine',
+            'avgJaccard',
+            // CONFUSION MATRIX
+            'confusionMatrix',
+            'comparisonMetrics'
+        ));
     }
+
+    /* ================= METHOD-METHOD BARU UNTUK CONFUSION MATRIX ================= */
     
+    /**
+     * Ambil semua dokumen yang memenuhi filter
+     */
+    private function getAllFilteredDocuments($letterType, $startDate, $endDate)
+    {
+        $documents = [];
+        
+        // Ambil surat masuk
+        if (!$letterType || $letterType == 'all' || $letterType == 'masuk') {
+            $query = SuratMasuk::query();
+            
+            if ($startDate) {
+                $query->whereDate('tanggal_surat', '>=', $startDate);
+            }
+            if ($endDate) {
+                $query->whereDate('tanggal_surat', '<=', $endDate);
+            }
+            
+            $suratMasuk = $query->get();
+            
+            // Ambil semua tokens untuk surat masuk sekaligus
+            $masukIds = $suratMasuk->pluck('id')->toArray();
+            $masukTokens = [];
+            
+            if (!empty($masukIds)) {
+                $masukTokens = DB::table('surat_terms')
+                    ->where('surat_type', 'masuk')
+                    ->whereIn('surat_id', $masukIds)
+                    ->select('surat_id', DB::raw('GROUP_CONCAT(term SEPARATOR ",") as terms'))
+                    ->groupBy('surat_id')
+                    ->pluck('terms', 'surat_id')
+                    ->toArray();
+            }
+            
+            foreach ($suratMasuk as $item) {
+                $tokens = [];
+                if (isset($masukTokens[$item->id])) {
+                    $tokens = explode(',', $masukTokens[$item->id]);
+                }
+                
+                $documents[] = [
+                    'id' => 'SM-' . $item->id,
+                    'tipe' => 'masuk',
+                    'isi' => $item->perihal,
+                    'tokens' => $tokens
+                ];
+            }
+        }
+        
+        // Ambil surat keluar
+        if (!$letterType || $letterType == 'all' || $letterType == 'keluar') {
+            $query = SuratKeluar::query();
+            
+            if ($startDate) {
+                $query->whereDate('tanggal_surat', '>=', $startDate);
+            }
+            if ($endDate) {
+                $query->whereDate('tanggal_surat', '<=', $endDate);
+            }
+            
+            $suratKeluar = $query->get();
+            
+            // Ambil semua tokens untuk surat keluar sekaligus
+            $keluarIds = $suratKeluar->pluck('id')->toArray();
+            $keluarTokens = [];
+            
+            if (!empty($keluarIds)) {
+                $keluarTokens = DB::table('surat_terms')
+                    ->where('surat_type', 'keluar')
+                    ->whereIn('surat_id', $keluarIds)
+                    ->select('surat_id', DB::raw('GROUP_CONCAT(term SEPARATOR ",") as terms'))
+                    ->groupBy('surat_id')
+                    ->pluck('terms', 'surat_id')
+                    ->toArray();
+            }
+            
+            foreach ($suratKeluar as $item) {
+                $tokens = [];
+                if (isset($keluarTokens[$item->id])) {
+                    $tokens = explode(',', $keluarTokens[$item->id]);
+                }
+                
+                $documents[] = [
+                    'id' => 'SK-' . $item->id,
+                    'tipe' => 'keluar',
+                    'isi' => $item->perihal,
+                    'tokens' => $tokens
+                ];
+            }
+        }
+        
+        return $documents;
+    }
+
+    
+    public function preprosesQuery($query, $letterType = null, $startDate = null, $endDate = null, $executionTime = null, $resultsCount = null, $avgCosine = null, $avgJaccard = null)
+    {
+        // Validasi lagi untuk safety
+        $cleanQuery = trim($query);
+        if (empty($cleanQuery)) {
+            return [
+                'queryModel' => null,
+                'terms'      => [],
+                'tf'         => [],
+                'idf'        => [],
+                'tfidf'      => [],
+                'tfidfNorm'  => [],
+                'totalDocs'  => 0,
+            ];
+        }
+        
+        // Normalize parameters untuk konsistensi
+        $normalizedLetterType = $letterType ?: 'all';
+        $normalizedStartDate = $startDate ? date('Y-m-d', strtotime($startDate)) : null;
+        $normalizedEndDate = $endDate ? date('Y-m-d', strtotime($endDate)) : null;
+        
+        // CEK DULU: Apakah query ini sudah ada di database dengan parameter yang sama?
+        $queryModel = Query::where('query_text', $cleanQuery)
+            ->where('letter_type', $normalizedLetterType)
+            ->when($normalizedStartDate, function($q) use ($normalizedStartDate) {
+                return $q->where('start_date', $normalizedStartDate);
+            }, function($q) {
+                return $q->whereNull('start_date');
+            })
+            ->when($normalizedEndDate, function($q) use ($normalizedEndDate) {
+                return $q->where('end_date', $normalizedEndDate);
+            }, function($q) {
+                return $q->whereNull('end_date');
+            })
+            ->first();
+        
+        // Jika belum ada, baru CREATE
+        if (!$queryModel) {
+            try {
+                $queryModel = Query::create([
+                    'query_text' => $cleanQuery,
+                    'letter_type' => $normalizedLetterType,
+                    'start_date' => $normalizedStartDate,
+                    'end_date' => $normalizedEndDate,
+                    'execution_time' => 0, // Default 0, akan diupdate nanti
+                    'results_count' => 0,  // Default 0, akan diupdate nanti
+                    'avg_cosine_score' => 0, // Default 0, akan diupdate nanti
+                    'avg_jaccard_score' => 0 // Default 0, akan diupdate nanti
+                ]);
+            } catch (\Exception $e) {
+                // Jika gagal menyimpan, tetap lanjutkan proses pencarian
+                $queryModel = null;
+                Log::warning('Gagal menyimpan query: ' . $e->getMessage());
+            }
+        }
+        // Jika query sudah ada, gunakan yang existing
+        // Tidak perlu create baru
+        
+        // 2. Pre-processing (tetap perlu dilakukan untuk tfidf)
+        $queryTokens = TextPreprocessor::preprocessText($cleanQuery);
+        $queryTF     = array_count_values($queryTokens);
+        $terms       = array_keys($queryTF);
+        $N           = SuratMasuk::count() + SuratKeluar::count();
+        
+        // 3. IDF dari tabel surat_terms (baca DB)
+        $idfMap = $this->getIdfMap($terms, $N);
+
+        // 4. TF-IDF query + normalisasi
+        $queryTfidf = [];
+        foreach ($terms as $t) {
+            $tfWeight = ($queryTF[$t] ?? 0) > 0 ? 1 + log10($queryTF[$t]) : 0;
+            $idf      = $idfMap[$t] ?? log10($N / 1); // df=1 fallback
+            $queryTfidf[$t] = $tfWeight * $idf;
+        }
+        $len = sqrt(array_sum(array_map(fn($v) => $v * $v, $queryTfidf)));
+        if ($len) {
+            $queryTfidfNorm = array_map(fn($v) => round($v / $len, 6), $queryTfidf);
+        } else {
+            $queryTfidfNorm = [];
+        }
+
+        // 5. Simpan ke query_terms (opsional) - hanya jika queryModel berhasil dibuat
+        if ($queryModel) {
+            foreach ($queryTfidfNorm as $term => $w) {
+                try {
+                    QueryTerm::updateOrCreate(
+                        ['query_id' => $queryModel->id, 'term' => $term],
+                        [
+                            'tf'            => $queryTF[$term] ?? 0,
+                            'idf'           => $idfMap[$term] ?? log10($N / 1),
+                            'tfidf'         => $queryTfidf[$term],
+                            'tfidf_norm'    => $w
+                        ]
+                    );
+                } catch (\Exception $e) {
+                    Log::warning('Gagal menyimpan query term: ' . $e->getMessage());
+                }
+            }
+        }
+
+        return [
+            'queryModel' => $queryModel,
+            'terms'      => $terms,
+            'tf'         => $queryTF,
+            'idf'        => $idfMap,
+            'tfidf'      => $queryTfidf,
+            'tfidfNorm'  => $queryTfidfNorm,
+            'totalDocs'  => $N,
+        ];
+    }
+
+    /* ---------- AMBIL IDF DARI TABEL surat_terms ---------- */
+    private function getIdfMap(array $terms, int $totalDocs): array
+    {
+        $key = 'idf_map:' . md5(implode('|', $terms));
+        return Cache::remember($key, now()->addMinutes(10), function () use ($terms, $totalDocs) {
+            return DB::table('surat_terms')
+                ->select('term', DB::raw('COUNT(DISTINCT CONCAT(surat_type,"-",surat_id)) as df'))
+                ->whereIn('term', $terms)
+                ->groupBy('term')
+                ->pluck('df', 'term')
+                ->map(function ($df) use ($totalDocs) {
+                    return $df > 0 ? round(log10($totalDocs / $df), 4) : round(log10($totalDocs / 1), 4);
+                })
+                ->toArray();
+        });
+    }
 }

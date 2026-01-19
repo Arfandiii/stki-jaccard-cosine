@@ -173,12 +173,7 @@ class SuratKeluarController extends Controller
         if ($surat->file_path && Storage::exists($surat->file_path)) {
             Storage::delete($surat->file_path);
         }
-
-        // Hapus juga terms-nya
-        SuratTerm::where('surat_type', 'keluar')
-            ->where('surat_id', $id)
-            ->delete();
-
+        
         $surat->delete();
 
         // ➕ Recalculate IDF & TF-IDF global

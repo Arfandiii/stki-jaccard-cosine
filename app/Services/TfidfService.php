@@ -6,6 +6,14 @@ use Illuminate\Support\Facades\DB;
 class TfidfService
 {
     
+    /**
+     * Hitung frekuensi term unik dari dokumen dan query.
+     * 
+     * @param array $documents Dokumen yang akan dihitung frekuensi termnya.
+     * @param array $queryTokens Query yang akan dihitung frekuensi termnya.
+     * 
+     * @return array Table yang berisi frekuensi term untuk tiap dokumen dan query.
+     */
     public static function calculateTermFrequencies($documents, $queryTokens)
     {
         $allTerms = [];
@@ -95,7 +103,6 @@ class TfidfService
 
         return $idfTable;
     }
-
 
     public static function calculateTFIDF($tfWeightTable, $idfTable, $docCount)
     {
@@ -197,7 +204,6 @@ class TfidfService
         foreach ($documents as $row) {
             $key = $row->term;
             $docKey = $row->surat_type . '-' . $row->surat_id;
-
             $dfMap[$key][$docKey] = true;
         }
 
@@ -216,8 +222,8 @@ class TfidfService
 
         foreach ($documents as $row) {
             $docKey = $row->surat_type . '-' . $row->surat_id;
-            $tfidf  = $row->tf * ($idfMap[$row->term] ?? 0);
-
+            $idf    = $idfMap[$row->term] ?? 0;        // <- sudah ada
+            $tfidf  = $row->tf * $idf;
             $tfidfByDoc[$docKey][] = $tfidf;
 
             DB::table('surat_terms')
@@ -225,6 +231,7 @@ class TfidfService
                 ->where('surat_id', $row->surat_id)
                 ->where('term', $row->term)
                 ->update([
+                    'idf' => $idf,
                     'tfidf' => $tfidf
                 ]);
         }
@@ -234,11 +241,8 @@ class TfidfService
         * ===================== */
         foreach ($tfidfByDoc as $docKey => $values) {
             $norm = sqrt(array_sum(array_map(fn($v) => $v * $v, $values)));
-
             if ($norm == 0) continue;
-
             [$type, $id] = explode('-', $docKey);
-
             DB::table('surat_terms')
                 ->where('surat_type', $type)
                 ->where('surat_id', $id)

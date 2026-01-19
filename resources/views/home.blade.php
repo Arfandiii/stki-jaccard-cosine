@@ -119,12 +119,41 @@
                             class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition">Tentang</a>
                     </div>
                 </div>
-
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('login') }}"
-                        class="bg-linear-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition">
-                        <i class="#"></i>Login
-                    </a>
+                    @auth
+                        {{-- User sudah login --}}
+                        <div class="flex items-center space-x-3">
+                            <span class="text-sm text-gray-700 hidden md:inline">
+                                Hi, {{ Auth::user()->name }}
+                            </span>
+
+                            {{-- Dashboard Link --}}
+                            <a href="{{ route('admin.dashboard') }}"
+                                class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition">
+                                <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                            </a>
+
+                            {{-- Logout Button --}}
+                            <form method="POST" action="{{ route('admin.logout') }}" class="inline">
+                                @csrf
+                                <button type="submit"
+                                    class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition cursor-pointer">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                </button>
+                            </form>
+                        </div>
+                    @else
+                        <div class="flex items-center space-x-4">
+                            <a href="{{ route('login') }}"
+                                class="bg-linear-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition">
+                                <i class="#"></i>Login
+                            </a>
+                            <button class="md:hidden text-gray-700" onclick="toggleMobileMenu()">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                        </div>
+                    @endauth
+
                     <button class="md:hidden text-gray-700" onclick="toggleMobileMenu()">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -162,8 +191,9 @@
                         <span class="gradient-text">Pencarian Arsip Surat</span>
                     </h1>
 
-                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
-                        Temukan arsip surat dengan mudah menggunakan algoritma Jaccard Similarity dan Cosine Similarity.
+                    <p class="text-l text-gray-600 mb-8 leading-relaxed">
+                        Sistem Pencarian Arsip Surat menggunakan Perbandingan Metode Jaccard Similarity dan Cosine
+                        Similarity.
                         Sistem kami memberikan hasil pencarian yang akurat dan relevan untuk arsip surat masuk dan
                         keluar.
                     </p>
@@ -189,7 +219,7 @@
                         </div>
                         <div class="relative bg-white rounded-3xl shadow-2xl p-8">
                             <div class="flex items-center justify-between mb-6">
-                                <h3 class="text-xl font-bold text-gray-800">Demo Pencarian</h3>
+                                <h3 class="text-xl font-bold text-gray-800">Fitur Utama</h3>
                                 <div class="flex space-x-2">
                                     <span class="w-3 h-3 bg-red-400 rounded-full"></span>
                                     <span class="w-3 h-3 bg-yellow-400 rounded-full"></span>
@@ -200,17 +230,17 @@
                             <div class="space-y-4">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-2 h-2 bg-green-400 rounded-full pulse-slow"></div>
-                                    <span class="text-sm text-gray-600">Algoritma Jaccard Similarity</span>
+                                    <span class="text-sm text-gray-600">Pengelolaan Arsip Digital</span>
                                 </div>
                                 <div class="flex items-center space-x-3">
                                     <div class="w-2 h-2 bg-blue-400 rounded-full pulse-slow"
                                         style="animation-delay: 1s;"></div>
-                                    <span class="text-sm text-gray-600">Algoritma Cosine Similarity</span>
+                                    <span class="text-sm text-gray-600">Pencarian Arsip Surat</span>
                                 </div>
                                 <div class="flex items-center space-x-3">
                                     <div class="w-2 h-2 bg-purple-400 rounded-full pulse-slow"
                                         style="animation-delay: 2s;"></div>
-                                    <span class="text-sm text-gray-600">Pencarian Real-time</span>
+                                    <span class="text-sm text-gray-600">Perbandingan Metode</span>
                                 </div>
                             </div>
 
@@ -236,69 +266,71 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    Fitur Unggulan Kami
+                    Fitur Unggulan
                 </h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                <p class="text-l text-gray-600 max-w-3xl mx-auto">
                     Teknologi canggih untuk memudahkan pengelolaan dan pencarian arsip surat dengan metode Jaccard
                     Similarity dan Cosine Similarity
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Jaccard Similarity -->
+                <!-- Pengelolaan Arsip Digital -->
                 <div class="algorithm-card p-8 rounded-2xl hover-card">
                     <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-6">
                         <i class="fas fa-percentage text-green-600 text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Jaccard Similarity</h3>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Pengelolaan Arsip Digital</h3>
                     <p class="text-gray-600 mb-6">
-                        Mengukur kemiripan berdasarkan irisan kata kunci antara dokumen query dan dokumen target.
+                        Pengelolaan Arsip Digital Surat Masuk dan Surat Keluar.
                     </p>
                     <ul class="space-y-2 text-sm text-gray-600">
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Cocok untuk
-                            pencarian sederhana</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Perhitungan
-                            cepat</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Input Metadata
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Manajemen Data
+                        </li>
                         <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Akurasi tinggi
                             untuk kata kunci spesifik</li>
                     </ul>
                 </div>
 
-                <!-- Cosine Similarity -->
+                <!--Fitur Pencarian-->
                 <div class="algorithm-card p-8 rounded-2xl hover-card">
                     <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
                         <i class="fas fa-calculator text-blue-600 text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Cosine Similarity</h3>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Pencarian Arsip Surat</h3>
                     <p class="text-gray-600 mb-6">
-                        Menggunakan vektor TF-IDF untuk menghitung kemiripan berdasarkan bobot kata.
+                        Hasil pencarian akan muncul dalam bentuk perbandingan dua metode.
                     </p>
                     <ul class="space-y-2 text-sm text-gray-600">
-                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Lebih presisi
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Form Pencarian
+                            Teks
                         </li>
-                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Mempertimbangkan
-                            bobot kata</li>
-                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Cocok untuk
-                            dokumen panjang</li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Tampilan Hasil
+                            Relevan</li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i>Filter dan
+                            Penyortiran</li>
                     </ul>
                 </div>
 
-                <!-- Real-time Search -->
+                <!--Perbandingan Metode -->
                 <div class="algorithm-card p-8 rounded-2xl hover-card">
                     <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6">
                         <i class="fas fa-bolt text-purple-600 text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Pencarian Real-time</h3>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Perbandingan Metode</h3>
                     <p class="text-gray-600 mb-6">
-                        Hasil pencarian langsung muncul saat Anda mengetik dengan performa optimal.
-                    </p>
+                        Menggunakan Metode Jaccard Similarity dan Cosine Similarity.
                     <ul class="space-y-2 text-sm text-gray-600">
-                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Respons cepat
+                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Hasil Akurasi
+                            Pencarian
                         </li>
-                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Auto-suggestion
+                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Waktu Pencarian
                         </li>
-                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Filtering
-                            lanjutan</li>
+                        <li class="flex items-center"><i class="fas fa-check text-purple-500 mr-2"></i>Jumlah Dokumen
+                            Terindeks
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -312,15 +344,17 @@
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                     Tentang Sistem Kami
                 </h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Solusi modern untuk pengelolaan arsip surat dengan teknologi pencarian canggih
+                <p class="text-l text-gray-600 max-w-3xl mx-auto">
+                    Sistem ini bertujuan untuk mempermudah dan mempercepat proses temu kembali arsip surat secara
+                    efektif dan efisien. Perbandingan Metode Jaccard Similarity dan Cosine Similarity bertujuan untuk
+                    mengetahui metode mana yang lebih optimal untuk jenis data arsip surat tertentu.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"
-                        alt="Digital Archive System" class="rounded-2xl shadow-xl">
+                    <img src="{{ asset('storage/images/dashboard.svg') }}" alt="Digital Archive System"
+                        class="rounded-2xl shadow-xl">
                 </div>
 
                 <div class="space-y-6">
@@ -329,9 +363,9 @@
                             <i class="fas fa-rocket text-blue-600"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Performa Cepat</h3>
-                            <p class="text-gray-600">Pencarian dilakukan dalam hitungan milidetik dengan algoritma yang
-                                dioptimalkan.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Metode Jaccard Similarity</h3>
+                            <p class="text-gray-600">Mengukur Kemiripan berdasarkan irisan kata kunci antara dokumen
+                                query dan dokumen target.</p>
                         </div>
                     </div>
 
@@ -340,8 +374,9 @@
                             <i class="fas fa-shield-alt text-green-600"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Keamanan Terjamin</h3>
-                            <p class="text-gray-600">Data arsip tersimpan dengan aman menggunakan enkripsi terbaru.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Metode Cosine Similarity</h3>
+                            <p class="text-gray-600">Menggunakan Vektor TF-IDF untuk menghitung kemiripan berdasarkan
+                                bobot kata.</p>
                         </div>
                     </div>
 
@@ -350,8 +385,10 @@
                             <i class="fas fa-chart-line text-purple-600"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Analisis Mendalam</h3>
-                            <p class="text-gray-600">Dapatkan insight dari pola pencarian dan penggunaan arsip.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Pencarian Cepat dan Pengelolaan Arsip
+                                Digital</h3>
+                            <p class="text-gray-600">Pencarian dilakukan dengan algoritma yang dioptimalkan dan
+                                mengelola data arsip surat dengan efektif dan efisien.</p>
                         </div>
                     </div>
                 </div>
@@ -376,9 +413,9 @@
                 <div>
                     <h4 class="font-semibold mb-4">Fitur</h4>
                     <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="#" class="hover:text-white transition">Algoritma Jaccard</a></li>
-                        <li><a href="#" class="hover:text-white transition">Algoritma Cosine</a></li>
-                        <li><a href="#" class="hover:text-white transition">Statistik Laporan</a></li>
+                        <li><a href="#" class="hover:text-white transition">Pengelolaan Arsip Digital</a></li>
+                        <li><a href="#" class="hover:text-white transition">Pencarian Arsip Surat</a></li>
+                        <li><a href="#" class="hover:text-white transition">Perbandingan Metode</a></li>
                     </ul>
                 </div>
                 <div>
@@ -405,156 +442,6 @@
             </div>
         </div>
     </footer>
-
-    <script>
-        // Smooth scrolling
-        function scrollToSection(sectionId) {
-            document.getElementById(sectionId).scrollIntoView({
-                behavior: 'smooth'
-            });
-        }
-
-        function scrollToSearch() {
-            document.getElementById('search').scrollIntoView({
-                behavior: 'smooth'
-            });
-        }
-
-        // Search functionality
-        async function performSearch() {
-            const query = document.getElementById('searchInput').value;
-            const jenis = document.getElementById('jenisSurat').value;
-            const tanggalMulai = document.getElementById('tanggalMulai').value;
-            const tanggalSelesai = document.getElementById('tanggalSelesai').value;
-
-            if (!query.trim()) {
-                alert('Silakan masukkan kata kunci pencarian');
-                return;
-            }
-
-            // Show loading state
-            document.getElementById('searchResults').classList.remove('hidden');
-            document.getElementById('jaccardResults').innerHTML =
-                '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i></div>';
-            document.getElementById('cosineResults').innerHTML =
-                '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i></div>';
-
-            try {
-                // Simulate search results
-                setTimeout(() => {
-                    displayResults('jaccard', generateMockResults('jaccard', query));
-                    displayResults('cosine', generateMockResults('cosine', query));
-                    updateStatistics();
-                }, 2000);
-
-            } catch (error) {
-                console.error('Search error:', error);
-                alert('Terjadi kesalahan saat mencari. Silakan coba lagi.');
-            }
-        }
-
-        function generateMockResults(algorithm, query) {
-            const mockData = [{
-                    title: 'Surat Undangan Rapat Koordinasi',
-                    number: '001/ARSIP/2024',
-                    date: '2024-01-15',
-                    description: 'Surat undangan untuk rapat koordinasi bulanan departemen',
-                    similarity: algorithm === 'jaccard' ? 85 : 92,
-                    type: 'masuk'
-                },
-                {
-                    title: 'Notulensi Hasil Rapat',
-                    number: '002/ARSIP/2024',
-                    date: '2024-01-16',
-                    description: 'Notulensi lengkap hasil rapat koordinasi yang telah dilaksanakan',
-                    similarity: algorithm === 'jaccard' ? 72 : 78,
-                    type: 'keluar'
-                },
-                {
-                    title: 'Surat Edaran Rapat',
-                    number: '003/ARSIP/2024',
-                    date: '2024-01-17',
-                    description: 'Edaran informasi terkait jadwal dan agenda rapat',
-                    similarity: algorithm === 'jaccard' ? 65 : 71,
-                    type: 'keluar'
-                }
-            ];
-
-            return mockData.filter(item =>
-                item.title.toLowerCase().includes(query.toLowerCase()) ||
-                item.description.toLowerCase().includes(query.toLowerCase())
-            );
-        }
-
-        function displayResults(algorithm, results) {
-            const container = document.getElementById(algorithm + 'Results');
-
-            if (results.length === 0) {
-                container.innerHTML = '<div class="text-center py-8 text-gray-500">Tidak ada hasil ditemukan</div>';
-                return;
-            }
-
-            container.innerHTML = results.map(result => `
-            <div class="result-card p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition cursor-pointer">
-                <div class="flex justify-between items-start mb-3">
-                    <h4 class="font-semibold text-gray-900 text-sm">${result.title}</h4>
-                    <span class="algorithm-badge ${algorithm === 'jaccard' ? 'jaccard-badge' : 'cosine-badge'}">
-                        ${result.similarity}% Match
-                    </span>
-                </div>
-                <p class="text-xs text-gray-600 mb-2">
-                    <i class="fas fa-hashtag mr-1"></i>${result.number} | 
-                    <i class="fas fa-calendar mr-1"></i>${formatDate(result.date)}
-                </p>
-                <p class="text-sm text-gray-700 mb-3">${result.description}</p>
-                <div class="flex justify-between items-center">
-                    <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-                        ${result.type === 'masuk' ? 'Surat Masuk' : 'Surat Keluar'}
-                    </span>
-                    <button class="text-blue-600 hover:text-blue-800 text-xs font-medium">
-                        Lihat Detail →
-                    </button>
-                </div>
-            </div>
-        `).join('');
-        }
-
-        function updateStatistics() {
-            // Update counts (mock data)
-            document.getElementById('jaccardCount').textContent = '3';
-            document.getElementById('cosineCount').textContent = '3';
-            document.getElementById('avgJaccard').textContent = '74%';
-            document.getElementById('avgCosine').textContent = '80%';
-        }
-
-        function formatDate(dateString) {
-            const options = {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            };
-            return new Date(dateString).toLocaleDateString('id-ID', options);
-        }
-
-        // Add keyboard shortcut
-        document.addEventListener('DOMContentLoaded', function() {
-            document.addEventListener('keydown', function(e) {
-                if (e.ctrlKey && e.key === '/') {
-                    e.preventDefault();
-                    document.getElementById('searchInput').focus();
-                }
-            });
-        });
-
-        // Add search glow effect
-        const searchInput = document.getElementById('searchInput');
-        searchInput.addEventListener('focus', function() {
-            this.classList.add('search-glow-active');
-        });
-        searchInput.addEventListener('blur', function() {
-            this.classList.remove('search-glow-active');
-        });
-    </script>
 
     <style>
         .search-glow {

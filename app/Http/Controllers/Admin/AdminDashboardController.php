@@ -6,9 +6,12 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\SuratKeluar;
 use App\Models\SuratMasuk;
+use App\Models\User;
+use App\Models\Query;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\History;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AdminDashboardController extends Controller
 {
@@ -17,13 +20,100 @@ class AdminDashboardController extends Controller
      */
     public function index()
     {
-        $totalSuratMasuk = count(SuratMasuk::all());
-        $totalSuratKeluar = count(SuratKeluar::all());
+        // Total surat
+        $totalSuratMasuk = SuratMasuk::count();
+        $totalSuratKeluar = SuratKeluar::count();
+        $totalSurat = $totalSuratMasuk + $totalSuratKeluar;
+        
+        // Statistik bulanan
+        $bulanIni = Carbon::now()->month;
+        $tahunIni = Carbon::now()->year;
+        
+        $suratMasukBulanIni = SuratMasuk::whereMonth('tanggal_surat', $bulanIni)
+            ->whereYear('tanggal_surat', $tahunIni)
+            ->count();
+        
+        $suratKeluarBulanIni = SuratKeluar::whereMonth('tanggal_surat', $bulanIni)
+            ->whereYear('tanggal_surat', $tahunIni)
+            ->count();
+        
+        // Statistik harian
+        $hariIni = Carbon::today();
+        $suratMasukHariIni = SuratMasuk::whereDate('created_at', $hariIni)->count();
+        $suratKeluarHariIni = SuratKeluar::whereDate('created_at', $hariIni)->count();
+        
+        // Statistik Query
+        $totalQueries = Query::count();
+        $queriesToday = Query::whereDate('created_at', $hariIni)->count();
+        
+        // Query popular
+        $popularQueries = Query::select('query_text', DB::raw('COUNT(*) as count'))
+            ->groupBy('query_text')
+            ->orderByDesc('count')
+            ->take(5)
+            ->get();
+        
+        // Chart data untuk 7 hari terakhir
+        $chartData = $this->getChartData();
+        
+        // Recent queries
+        $recentQueries = Query::latest()->take(5)->get();
 
-        return view('admin.dashboard', compact('totalSuratMasuk', 'totalSuratKeluar'));
+        return view('admin.dashboard', compact(
+            'totalSuratMasuk',
+            'totalSuratKeluar',
+            'totalSurat',
+            'suratMasukBulanIni',
+            'suratKeluarBulanIni',
+            'suratMasukHariIni',
+            'suratKeluarHariIni',
+            'totalQueries',
+            'queriesToday',
+            'popularQueries',
+            'chartData',
+            'recentQueries'
+        ));
     }
 
+    /**
+     * Get chart data for last 7 days
+     */
+    private function getChartData()
+    {
+        $days = [];
+        $suratMasukData = [];
+        $suratKeluarData = [];
+        $queryData = [];
+        
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $dayName = $date->translatedFormat('D');
+            $dateString = $date->toDateString();
+            
+            // Count surat masuk
+            $masuk = SuratMasuk::whereDate('created_at', $date)->count();
+            
+            // Count surat keluar
+            $keluar = SuratKeluar::whereDate('created_at', $date)->count();
+            
+            // Count queries
+            $queries = Query::whereDate('created_at', $date)->count();
+            
+            $days[] = $dayName;
+            $suratMasukData[] = $masuk;
+            $suratKeluarData[] = $keluar;
+            $queryData[] = $queries;
+        }
+        
+        return [
+            'days' => $days,
+            'surat_masuk' => $suratMasukData,
+            'surat_keluar' => $suratKeluarData,
+            'queries' => $queryData
+        ];
+    }
 
+    // ... (fungsi lainnya tetap sama seperti sebelumnya)
     public function profile()
     {
         return view('admin.profile');
@@ -31,50 +121,19 @@ class AdminDashboardController extends Controller
 
     public function history()
     {
-        $histories = History::latest()->paginate(10);
-        return view('admin.history', compact('histories'));
+        $queries = Query::latest()->paginate(10);
+        return view('admin.history', compact('queries'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function editProfile()
     {
-        // kirim data user yang sedang login
         $user = Auth::user();
         return view('admin.edit', compact('user'));
     }
 
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function updateProfile(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         $request->validate([
@@ -84,11 +143,9 @@ class AdminDashboardController extends Controller
             'new_password' => 'nullable|min:8|confirmed',
         ]);
 
-        // Update nama & email
         $user->name = $request->name;
         $user->email = $request->email;
 
-        // Jika user mengisi password lama → ganti password
         if ($request->filled('current_password')) {
             if (!Hash::check($request->current_password, $user->password)) {
                 return back()->withErrors(['current_password' => 'Password lama salah']);
@@ -100,12 +157,5 @@ class AdminDashboardController extends Controller
 
         return redirect()->route('admin.profile')
                         ->with('success', 'Profil atau password berhasil diperbarui.');
-    }
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

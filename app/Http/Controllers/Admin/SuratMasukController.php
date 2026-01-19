@@ -192,6 +192,9 @@ class SuratMasukController extends Controller
 
         $surat->delete();
 
+        // ➕ Recalculate IDF & TF-IDF global
+        TfidfService::recalculateGlobalTFIDF();
+
         return redirect()
             ->route('admin.surat-masuk.index')
             ->with('success', 'Surat berhasil dihapus');

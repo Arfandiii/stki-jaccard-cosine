@@ -4,25 +4,37 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Query extends Model
 {
     protected $fillable = [
-        'query_text','letter_type','start_date','end_date',
-        'execution_time','method'
+        'user_id',
+        'query_text', 
+        'letter_type', 
+        'start_date', 
+        'end_date',
+        'execution_time',
+        'results_count',
+        'avg_cosine_score',
+        'avg_jaccard_score'
     ];
+    
     protected $casts = [
         'start_date' => 'date',
         'end_date'   => 'date',
         'execution_time' => 'float',
+        'avg_cosine_score' => 'float',
+        'avg_jaccard_score' => 'float'
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function terms(): HasMany
     {
         return $this->hasMany(QueryTerm::class);
-    }
-    public function results(): HasMany
-    {
-        return $this->hasMany(QueryResult::class);
     }
 }

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('term');
 
             $table->decimal('tf', 8, 4)->default(0);
+            $table->double('idf')->default(0); // opsional, bantu debug
             $table->decimal('tfidf', 10, 6)->default(0);
             $table->decimal('tfidf_norm', 10, 6)->default(0);
 

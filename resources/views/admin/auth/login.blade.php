@@ -64,7 +64,7 @@
                 <h1 class="text-3xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                     Sistem Arsip Digital
                 </h1>
-                <p class="text-gray-600">Temu Kembali Informasi dengan Jaccard & Cosine</p>
+                <p class="text-gray-600">Sistem Temu Kembali Informasi dengan Jaccard Similarity & Cosine Similarity</p>
             </div>
 
             <!-- Login Card -->
