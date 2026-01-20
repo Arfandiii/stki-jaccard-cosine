@@ -185,14 +185,14 @@
                 </div>
 
                 <!-- STATISTIK UTAMA -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                     <div class="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
                         <div class="text-center">
                             <div class="text-3xl font-bold text-blue-600 mb-1">{{ $totalSuratUnik ?? 0 }}</div>
                             <div class="text-sm text-gray-600">Total Surat</div>
                             <div class="text-xs text-gray-400 mt-1">
                                 @if (isset($totalJaccard) && isset($totalCosine))
-                                    Ditemukan di {{ $totalJaccard + $totalCosine }} hasil algoritma
+                                    Cosine: {{ $totalCosine }}, Jaccard: {{ $totalJaccard }}
                                 @endif
                             </div>
                         </div>
@@ -221,13 +221,78 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Waktu Cosine -->
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-blue-600 mb-1">
+                                {{ isset($cosineTime) ? number_format($cosineTime, 3) : '0' }}s
+                            </div>
+                            <div class="text-sm text-gray-600">Waktu Cosine</div>
+                            <div class="text-xs text-gray-400 mt-1">Algoritma Cosine</div>
+                        </div>
+                    </div>
+
+                    <!-- Waktu Jaccard -->
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-green-100">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-green-600 mb-1">
+                                {{ isset($jaccardTime) ? number_format($jaccardTime, 3) : '0' }}s
+                            </div>
+                            <div class="text-sm text-gray-600">Waktu Jaccard</div>
+                            <div class="text-xs text-gray-400 mt-1">Algoritma Jaccard</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tambahkan baris baru untuk total waktu dan preprocessing -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <!-- Total Waktu -->
                     <div class="bg-white p-4 rounded-lg shadow-sm border border-orange-100">
                         <div class="text-center">
                             <div class="text-3xl font-bold text-orange-600 mb-1">
-                                {{ isset($searchTime) ? number_format($searchTime, 3) : '0' }}s
+                                {{ isset($totalTime) ? number_format($totalTime, 3) : '0' }}s
                             </div>
-                            <div class="text-sm text-gray-600">Waktu Pencarian</div>
-                            <div class="text-xs text-gray-400 mt-1">Proses 2 algoritma</div>
+                            <div class="text-sm text-gray-600">Total Waktu</div>
+                            <div class="text-xs text-gray-400 mt-1">Proses pencarian lengkap</div>
+                        </div>
+                    </div>
+
+                    <!-- Waktu Preprocessing -->
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-gray-600 mb-1">
+                                {{ isset($preprocessingTime) ? number_format($preprocessingTime, 3) : '0' }}s
+                            </div>
+                            <div class="text-sm text-gray-600">Preprocessing</div>
+                            <div class="text-xs text-gray-400 mt-1">Tokenisasi & persiapan data</div>
+                        </div>
+                    </div>
+
+                    <!-- Selisih Waktu -->
+                    <div
+                        class="bg-white p-4 rounded-lg shadow-sm border border-{{ $cosineTime > $jaccardTime ? 'green' : 'blue' }}-100">
+                        <div class="text-center">
+                            <div
+                                class="text-3xl font-bold text-{{ $cosineTime > $jaccardTime ? 'green' : 'blue' }}-600 mb-1">
+                                @if (isset($cosineTime) && isset($jaccardTime))
+                                    {{ number_format(abs($cosineTime - $jaccardTime), 3) }}s
+                                @else
+                                    0.000s
+                                @endif
+                            </div>
+                            <div class="text-sm text-gray-600">Selisih Waktu</div>
+                            <div class="text-xs text-gray-400 mt-1">
+                                @if (isset($cosineTime) && isset($jaccardTime))
+                                    @if ($cosineTime > $jaccardTime)
+                                        Jaccard lebih cepat
+                                    @elseif($cosineTime < $jaccardTime)
+                                        Cosine lebih cepat
+                                    @else
+                                        Sama cepat
+                                    @endif
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>

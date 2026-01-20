@@ -18,6 +18,9 @@ return new class extends Migration
             $table->integer('results_count')->nullable();
             $table->decimal('avg_cosine_score', 5, 4)->nullable();
             $table->decimal('avg_jaccard_score', 5, 4)->nullable();
+            $table->decimal('cosine_time', 8, 3)->nullable();
+            $table->decimal('jaccard_time', 8, 3)->nullable();
+            $table->decimal('preprocessing_time', 8, 3)->nullable();
             $table->timestamps();
         });
 

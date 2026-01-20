@@ -61,7 +61,10 @@ class SearchController extends Controller
                 'jaccardPaginator' => null,
                 'cosineTotal' => 0,
                 'jaccardTotal' => 0,
-                'searchTime' => 0,
+                'totalTime' => 0,
+                'cosineTime' => 0,
+                'jaccardTime' => 0,
+                'preprocessingTime' => 0,
                 'totalSuratUnik' => 0,
                 'suratMasukUnik' => 0,
                 'suratKeluarUnik' => 0,
@@ -94,20 +97,31 @@ class SearchController extends Controller
         $startDate  = $request->input('startDate', $sessionParams['startDate'] ?? '');
         $endDate    = $request->input('endDate', $sessionParams['endDate'] ?? '');
 
-        // 1. Preprocess query - TANPA execution time dulu
+        // 1. Preprocess query - Catat waktu preprocessing
+        $preprocessingStart = microtime(true);
         $queryData  = $this->preprosesQuery($query, $letterType, $startDate, $endDate);
         $queryTfidfNorm = $queryData['tfidfNorm'];
         $queryTerms = $queryData['terms'];
+        $preprocessingTime = round(microtime(true) - $preprocessingStart, 3);
 
-        // 2. Get ALL results from both algorithms
+        // 2. Get Cosine Similarity Results - Catat waktu Cosine
+        $cosineStart = microtime(true);
         $allCosineResults = CosineSimilarity::getCosineResults($queryTfidfNorm, $letterType, $startDate, $endDate);
+        $cosineTime = round(microtime(true) - $cosineStart, 3);
+
+        // 3. Get Jaccard Similarity Results - Catat waktu Jaccard
+        $jaccardStart = microtime(true);
         $allJaccardResults = JaccardSimilarity::getJaccardResults($queryTerms, $letterType, $startDate, $endDate);
+        $jaccardTime = round(microtime(true) - $jaccardStart, 3);
         
         /* ================= CONFUSION MATRIX (hanya jika ada hasil) ================= */
         $confusionMatrix = null;
         $comparisonMetrics = null;
         
         if (!empty($allCosineResults) || !empty($allJaccardResults)) {
+            // Catat waktu confusion matrix
+            $confusionStart = microtime(true);
+            
             // Ambil semua dokumen yang memenuhi filter untuk ground truth
             $allDocuments = $this->getAllFilteredDocuments($letterType, $startDate, $endDate);
             
@@ -121,27 +135,29 @@ class SearchController extends Controller
             
             // Generate report untuk ditampilkan
             $comparisonMetrics = ConfusionMatrix::generateReport($confusionMatrix);
+            
+            $confusionTime = round(microtime(true) - $confusionStart, 3);
         }
         
-        // 3. Pagination settings - GUNAKAN PARAMETER BERBEDA
-        $perPage = 3;
+        // 4. Pagination settings - GUNAKAN PARAMETER BERBEDA
+        $perPage = 5; // Hasil per halaman
         $cosinePage = $request->input('cosine_page', 1);  // Parameter khusus Cosine
         $jaccardPage = $request->input('jaccard_page', 1); // Parameter khusus Jaccard
         
-        // 4. Paginate Cosine Results
+        // 5. Paginate Cosine Results
         $cosineCollection = collect($allCosineResults);
         $cosinePaginated = $cosineCollection->forPage($cosinePage, $perPage)->values();
         $cosineResults = $cosinePaginated->all();
         $cosineTotal = $cosineCollection->count();
         
-        // 5. Paginate Jaccard Results  
+        // 6. Paginate Jaccard Results  
         $jaccardCollection = collect($allJaccardResults);
         $jaccardPaginated = $jaccardCollection->forPage($jaccardPage, $perPage)->values();
         $jaccardResults = $jaccardPaginated->all();
         $jaccardTotal = $jaccardCollection->count();
         
-        // 6. Calculate statistics
-        $searchTime = round(microtime(true) - $startTime, 3);
+        // 7. Calculate total time
+        $totalTime = round(microtime(true) - $startTime, 3);
         
         // Gabungkan semua hasil dan ambil ID surat unik
         $allResults = array_merge($allCosineResults, $allJaccardResults);
@@ -177,28 +193,25 @@ class SearchController extends Controller
             ? collect($allJaccardResults)->avg('jaccard') 
             : 0;
 
-        // 7. UPDATE query di database dengan execution time dan results
-        if ($queryData['queryModel']) {
+        // 8. UPDATE query di database dengan execution time dan results
+        if ($queryData['queryModel'] && $isFormSubmit) {
             try {
-                // Cek apakah ini query baru (belum ada execution time)
-                // atau query existing dari pagination
-                if ($queryData['queryModel']->execution_time == 0) {
-                    // Ini query baru, update dengan hasil pencarian
-                    $queryData['queryModel']->update([
-                        'execution_time' => $searchTime,
-                        'results_count' => $resultsCount,
-                        'avg_cosine_score' => $avgCosine,
-                        'avg_jaccard_score' => $avgJaccard
-                    ]);
-                }
-                // Jika sudah ada execution time (dari pagination sebelumnya), 
-                // tidak perlu update lagi
+                // Ini query baru, update dengan hasil pencarian
+                $queryData['queryModel']->update([
+                    'execution_time' => $totalTime,
+                    'cosine_time' => $cosineTime,
+                    'jaccard_time' => $jaccardTime,
+                    'preprocessing_time' => $preprocessingTime,
+                    'results_count' => $resultsCount,
+                    'avg_cosine_score' => $avgCosine,
+                    'avg_jaccard_score' => $avgJaccard
+                ]);
             } catch (\Exception $e) {
                 Log::warning('Gagal update query stats: ' . $e->getMessage());
             }
         }
 
-        // 8. Create paginator instances for view dengan PARAMETER YANG BERBEDA
+        // 9. Create paginator instances untuk view dengan PARAMETER YANG BERBEDA
         $queryParams = [
             'query_text' => $query,
             'letterType' => $letterType,
@@ -246,7 +259,11 @@ class SearchController extends Controller
             // Totals
             'cosineTotal',
             'jaccardTotal',
-            'searchTime',
+            // Waktu eksekusi
+            'totalTime',
+            'cosineTime',
+            'jaccardTime',
+            'preprocessingTime',
             // STATISTIK SURAT UNIK
             'totalSuratUnik',
             'suratMasukUnik',
@@ -364,7 +381,10 @@ class SearchController extends Controller
     }
 
     
-    public function preprosesQuery($query, $letterType = null, $startDate = null, $endDate = null, $executionTime = null, $resultsCount = null, $avgCosine = null, $avgJaccard = null)
+    public function preprosesQuery($query, $letterType = null, $startDate = null, $endDate = null, 
+                                $executionTime = null, $cosineTime = null, $jaccardTime = null, 
+                                $preprocessingTime = null, $resultsCount = null, 
+                                $avgCosine = null, $avgJaccard = null)
     {
         // Validasi lagi untuk safety
         $cleanQuery = trim($query);
@@ -400,7 +420,7 @@ class SearchController extends Controller
             })
             ->first();
         
-        // Jika belum ada, baru CREATE
+        // Jika belum ada, baru CREATE dengan semua kolom waktu
         if (!$queryModel) {
             try {
                 $queryModel = Query::create([
@@ -408,13 +428,15 @@ class SearchController extends Controller
                     'letter_type' => $normalizedLetterType,
                     'start_date' => $normalizedStartDate,
                     'end_date' => $normalizedEndDate,
-                    'execution_time' => 0, // Default 0, akan diupdate nanti
-                    'results_count' => 0,  // Default 0, akan diupdate nanti
-                    'avg_cosine_score' => 0, // Default 0, akan diupdate nanti
-                    'avg_jaccard_score' => 0 // Default 0, akan diupdate nanti
+                    'execution_time' => 0,
+                    'cosine_time' => 0,
+                    'jaccard_time' => 0,
+                    'preprocessing_time' => 0,
+                    'results_count' => 0,
+                    'avg_cosine_score' => 0,
+                    'avg_jaccard_score' => 0
                 ]);
             } catch (\Exception $e) {
-                // Jika gagal menyimpan, tetap lanjutkan proses pencarian
                 $queryModel = null;
                 Log::warning('Gagal menyimpan query: ' . $e->getMessage());
             }
