@@ -140,7 +140,10 @@
                                     Waktu Eksekusi
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Hasil & Skor
+                                    Hasil
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Skor
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Tanggal
@@ -217,11 +220,14 @@
                                     <td class="px-6 py-4">
                                         <div class="space-y-2">
                                             <div class="flex items-center justify-between">
-                                                <span class="text-sm text-gray-600">Total Hasil:</span>
                                                 <span class="font-semibold px-2 py-1 bg-blue-50 rounded">
                                                     {{ $history->results_count ?? 0 }}
                                                 </span>
                                             </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="space-y-2">
                                             <div class="grid grid-cols-2 gap-2">
                                                 <div class="text-center">
                                                     <div class="text-xs text-gray-500">Cosine Score</div>
@@ -233,9 +239,7 @@
                                                     @else
                                                         <div class="text-sm text-gray-400">-</div>
                                                     @endif
-                                                </div>
-                                                <div class="text-center">
-                                                    <div class="text-xs text-gray-500">Jaccard Score</div>
+                                                    <div class="text-xs text-gray-500 mt-1">Jaccard Score</div>
                                                     @if ($history->avg_jaccard_score)
                                                         <div
                                                             class="text-sm font-semibold text-green-600 px-2 py-1 bg-green-50 rounded">
