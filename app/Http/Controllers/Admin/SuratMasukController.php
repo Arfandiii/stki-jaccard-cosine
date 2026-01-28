@@ -197,7 +197,7 @@ class SuratMasukController extends Controller
 
         return redirect()
             ->route('admin.surat-masuk.index')
-            ->with('success', 'Surat berhasil dihapus');
+            ->with('success', 'Surat berhasil dihapus & IDF diperbarui');
     }
 
 }
