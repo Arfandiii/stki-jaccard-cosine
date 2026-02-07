@@ -111,7 +111,7 @@ class SearchController extends Controller
 
         // 3. Get Jaccard Similarity Results - Catat waktu Jaccard
         $jaccardStart = microtime(true);
-        $allJaccardResults = JaccardSimilarity::getJaccardResults($queryTerms, $letterType, $startDate, $endDate);
+        $allJaccardResults = JaccardSimilarity::getWeightedJaccardResults($queryTfidfNorm, $letterType, $startDate, $endDate);
         $jaccardTime = round(microtime(true) - $jaccardStart, 3);
         
         /* ================= CONFUSION MATRIX (hanya jika ada hasil) ================= */

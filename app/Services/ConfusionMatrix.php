@@ -291,7 +291,7 @@ class ConfusionMatrix
         // F1-Score = 2 * (precision * recall) / (precision + recall)
         if (($matrix['precision'] + $matrix['recall']) > 0) {
             $matrix['f1'] = 2 * ($matrix['precision'] * $matrix['recall']) / 
-                           ($matrix['precision'] + $matrix['recall']);
+                            ($matrix['precision'] + $matrix['recall']);
         } else {
             $matrix['f1'] = 0;
         }
