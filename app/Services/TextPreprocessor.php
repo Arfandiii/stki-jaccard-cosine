@@ -23,10 +23,16 @@ class TextPreprocessor
         }
     }
 
-    /* ---------- 1. case-folding + tokenize ---------- */
+    /* ---------- 1. case-folding ---------- */
+    public static function caseFold($text)
+    {
+        return strtolower($text);
+    }
+
+    /* ---------- 2. tokenize ---------- */
     public static function tokenize($text)
     {
-        $text = strtolower($text);                       // case folding
+        $text = self::caseFold($text);
         $text = preg_replace('/\b[0-9]+[\.\)]/', '', $text); // 1. 2) 3-
         $text = preg_replace('/[^\p{L}\s]+/u', ' ', $text);  // buang simbol
         return preg_split('/\s+/', $text, -1, PREG_SPLIT_NO_EMPTY);
@@ -75,13 +81,15 @@ class TextPreprocessor
     public static function preprocessTextDetailed($text)
     {
         self::ensureInitialized();
+        $caseFolded = self::caseFold($text);
         $tokens   = self::tokenize($text);
         $filtered = self::filterTokens($tokens);
         $noStop   = self::removeStopwords($filtered);
         $stemmed  = self::stemTokens($noStop);
 
         return [
-            'case_folding_and_tokenizing' => $tokens,
+            'case_folding'                => $caseFolded,
+            'tokenizing' => $tokens,
             'filtering'                   => $filtered,
             'stopword_removal'            => $noStop,
             'stemming'                    => $stemmed,

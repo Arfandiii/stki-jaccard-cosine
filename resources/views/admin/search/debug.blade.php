@@ -84,6 +84,7 @@
                                     <th class="border p-3 text-center font-semibold">No</th>
                                     <th class="border p-3 text-center font-semibold">Tipe Surat</th>
                                     <th class="border p-3 font-semibold">Isi</th>
+                                    <th class="border p-3 font-semibold">Case Folding</th>
                                     <th class="border p-3 font-semibold">Tokenizing</th>
                                     <th class="border p-3 font-semibold">Filtering</th>
                                     <th class="border p-3 font-semibold">Stopword Removal</th>
@@ -94,10 +95,11 @@
                                 @foreach ($documentsdetailed as $idx => $doc)
                                     <tr class="transition hover:bg-blue-50">
                                         <td class="border p-3 text-center">{{ $idx + 1 }}</td>
-                                        <td class="border p-3 text-center">{{ $doc['nomor'] }}</td>
+                                        <td class="border p-3 text-center">{{ $doc['tipe'] }}</td>
                                         <td class="border p-3">{{ $doc['isi'] }}</td>
+                                        <td class="border p-3">{{ $doc['preprocessing']['case_folding'] }}</td>
                                         <td class="border p-3">|
-                                            {{ implode(' | ', $doc['preprocessing']['case_folding_and_tokenizing']) }} |
+                                            {{ implode(' | ', $doc['preprocessing']['tokenizing']) }} |
                                         </td>
                                         <td class="border p-3">| {{ implode(' | ', $doc['preprocessing']['filtering']) }} |
                                         </td>
